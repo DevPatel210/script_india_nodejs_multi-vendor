@@ -44,4 +44,4 @@ vendorSchema.methods.generateAuthToken = function () {
 };
 
 exports.vendorSchema = vendorSchema;
-exports.User = mongoose.model("Vendor", vendorSchema);
+exports.Vendor = mongoose.model("Vendor", vendorSchema);

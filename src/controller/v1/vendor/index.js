@@ -20,6 +20,6 @@ exports.update = (req, res) => {
 	handleResponse(vendorUpdate.Update(req), res);
 };
 
-exports.deleteUser = (req, res) => {
+exports.deleteVendor = (req, res) => {
 	handleResponse(vendorDelete.deleteVendor(req), res);
 };
