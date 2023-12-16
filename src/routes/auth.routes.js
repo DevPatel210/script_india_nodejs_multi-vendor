@@ -7,5 +7,6 @@ const auth = require("../controller/v1/auth");
 
 // @route   POST /api/auth/login
 router.post("/login", validate(rules.login), auth.login);
+router.post("/vendorLogin", validate(rules.login), auth.vendorLogin);
 
 module.exports = router;

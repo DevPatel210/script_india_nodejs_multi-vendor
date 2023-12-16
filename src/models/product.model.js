@@ -54,6 +54,11 @@ const productSchema = new mongoose.Schema({
 		required: true,
 		default: false,
 	},
+	vendor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Vendor',
+        required: true,
+    },
 	extraAttr: [extraAttrSchema],
 });
 

@@ -4,9 +4,12 @@ const makeMongoDbService = require("../../../services/mongoDbService")({
 });
 const { response, resMessage } = require("../../../helpers/common");
 
-// Create and Save a new Movie
+// Create and Save a new product
 exports.create = async (req) => {
   try {
+    if(!req.body.vendor){
+      req.body.vendor = req.vendor._id;
+    }
     const newProduct = await makeMongoDbService.createDocument(req.body);
 
     return response(
