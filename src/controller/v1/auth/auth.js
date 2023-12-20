@@ -32,8 +32,13 @@ exports.login = async (req) => {
 
 		delete user.password;
 		let token = await generateToken(user);
+		role = 'user';
+		if (user._id.toString() === "64a9a1908d34f28458d3398f") {
+			role = 'admin';
+		}
 		return response(false, resMessage.loginSuccess, resMessage.loginSuccess, {
 			token,
+			role: role,
 			user
 		});
 	} catch (error) {
@@ -65,6 +70,7 @@ exports.vendorLogin = async (req) => {
 		let token = await generateToken(vendor);
 		return response(false, resMessage.loginSuccess, resMessage.loginSuccess, {
 			token,
+			role: 'vendor',
 			vendor
 		});
 	} catch (error) {

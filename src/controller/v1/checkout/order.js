@@ -21,7 +21,7 @@ exports.get = async (req) => {
             ]
         };
 
-		if(req.user.isAdmin === true){
+		if(req.user && req.user.isAdmin === true){
             if(req.query.order_id && req.query.order_id !== ''){
                 matchCondition = {
                     _id: new mongoose.Types.ObjectId(req.query.order_id)

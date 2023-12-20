@@ -7,7 +7,7 @@ const makeMongoDbService = require("../../../services/mongoDbService")({
 // Delete a User with the specified id in the request
 exports.deleteUser = async (req) => {
   try {
-    const id = req.user.isAdmin ? req.body.id : req.user._id;
+    const id = (req.user && req.user.isAdmin) ? req.body.id : req.user._id;
     let user = await makeMongoDbService.getDocumentById(id);
     
     if (!user) {

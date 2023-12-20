@@ -7,7 +7,7 @@ const makeMongoDbService = require("../../../services/mongoDbService")({
 // Retrieve and return all vendors from the database.
 exports.findAll = async (req) => {
   try {
-    if (req.user.isAdmin) {
+    if (req.user && req.user.isAdmin) {
       let meta = {};
       const pageNumber = parseInt(req.query.pageNumber);
       const pageSize = 10;

@@ -9,7 +9,7 @@ const { response, resMessage } = require("../../../helpers/common");
 // Update user
 exports.Update = async (req) => {
   try {
-    const id = req.user.isAdmin ? req.body.id : req.user._id;
+    const id = (req.user && req.user.isAdmin) ? req.body.id : req.user._id;
     let isuser = await makeMongoDbServiceUser.getDocumentById(id);
 
     if (!isuser) {

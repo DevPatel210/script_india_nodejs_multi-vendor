@@ -7,7 +7,7 @@ const makeMongoDbService = require("../../../services/mongoDbService")({
 // Retrieve and return all users from the database.
 exports.findAll = async (req) => {
   try {
-    if (req.user.isAdmin) {
+    if (req.user && req.user.isAdmin) {
       let meta = {};
       const pageNumber = parseInt(req.query.pageNumber);
       const pageSize = 10;
@@ -81,7 +81,7 @@ exports.findAll = async (req) => {
 
 exports.findById = async (req) => {
   try {
-    const id = req.user.isAdmin ? req.query.id : req.user._id;
+    const id = (req.user && req.user.isAdmin) ? req.query.id : req.user._id;
     let isuser = await makeMongoDbService.getSingleDocumentById(id)
     
     if (!isuser) {
