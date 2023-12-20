@@ -10,6 +10,7 @@ module.exports = {
     body("first_name", "Name can not be empty").notEmpty().isString(),
     body("last_name", "Name can not be empty").notEmpty().isString(),
     body("email", "Invalid email").notEmpty().isEmail(),
+	body("commission", "Invalid commission").optional().default(0).notEmpty().isFloat({min:0}),
     body(
       "password",
       "Invalid password, password should be atleast 8 characters long"
@@ -28,6 +29,7 @@ module.exports = {
 			.isString(),
 		body("last_name", "Name can not be empty").optional().notEmpty().isString(),
 		body("email", "Invalid email").optional().notEmpty().isEmail(),
+		body("commission", "Invalid commission").optional().notEmpty().isFloat({min:0}),
 		body("password", "Invalid password")
 			.optional()
 			.notEmpty()

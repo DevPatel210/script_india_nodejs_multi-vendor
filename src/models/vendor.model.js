@@ -20,6 +20,11 @@ const vendorSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  commission: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
   status: {
     type: String,
     default: "A",

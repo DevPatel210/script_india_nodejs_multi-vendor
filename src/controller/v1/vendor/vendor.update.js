@@ -16,6 +16,9 @@ exports.Update = async (req) => {
       return response(true, resMessage.vendorNotFound, null);
     }
     const vendorData = req.body; // update vendor payload
+    if(req.isVendor==true && vendorData.commission){
+      delete vendorData.commission;
+    }
     const updatedVendor = await makeMongoDbServiceVendor.findOneAndUpdateDocument(
       { _id: id },
       vendorData
