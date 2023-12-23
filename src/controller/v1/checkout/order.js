@@ -46,6 +46,53 @@ exports.get = async (req) => {
                     : true,
                 totalPages: Math.ceil(parseInt(orderCount) / parseInt(pageSize)),
             };
+        }else if(req.isVendor === true){
+            if(req.query.order_id && req.query.order_id !== ''){
+                matchCondition = {
+                    $and: [
+                        { _id: new mongoose.Types.ObjectId(req.query.order_id) },
+                        { vendors: { $in: [req.vendor._id] } },
+                        { status: { $ne: 'D' } }
+                    ]
+                }
+            } else { 
+                matchCondition = {
+                    $and: [
+                        { vendors: { $in: [req.vendor._id] } },
+                        { status: { $ne: 'D' } }
+                    ]
+                } 
+            }
+            result = await makeMongoDbService.getDocumentByCustomAggregation([
+                { $match: matchCondition},
+                { $sort: sortCriteria },
+                { $skip: skip },
+                { $limit: pageSize },
+            ]);
+            orderCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
+            
+            result = result.map((order) => {
+                const filteredOrder = {...order};
+                const filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId==req.vendor._id);
+                let totalPrice = 0;
+                for(let product of filteredProducts){
+                    totalPrice += product.totalPrice;
+                }
+                filteredOrder.accounting.cartAccountingList = filteredProducts;
+                filteredOrder.accounting.finalTotal = totalPrice;
+                return filteredOrder     
+            })
+            meta = {
+                pageNumber,
+                pageSize,
+                totalCount: orderCount,
+                prevPage: parseInt(pageNumber) === 1 ? false : true,
+                nextPage:
+                parseInt(orderCount) / parseInt(pageSize) <= parseInt(pageNumber)
+                    ? false
+                    : true,
+                totalPages: Math.ceil(parseInt(orderCount) / parseInt(pageSize)),
+            };
         }else{    
             if(req.query.order_id && req.query.order_id !== ''){
                 matchCondition['$and'].push({
@@ -61,25 +108,26 @@ exports.get = async (req) => {
                 { $skip: skip },
                 { $limit: pageSize },
             ]);
-                orderCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
-    
-                meta = {
-                    pageNumber,
-                    pageSize,
-                    totalCount: orderCount,
-                    prevPage: parseInt(pageNumber) === 1 ? false : true,
-                    nextPage:
-                    parseInt(orderCount) / parseInt(pageSize) <= parseInt(pageNumber)
-                        ? false
-                        : true,
-                    totalPages: Math.ceil(parseInt(orderCount) / parseInt(pageSize)),
-                };
-            }
-            return response(false, null, resMessage.success, {
-                result,
-                meta,
-                usesDetails : req.user
-            });
+            orderCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
+
+            meta = {
+                pageNumber,
+                pageSize,
+                totalCount: orderCount,
+                prevPage: parseInt(pageNumber) === 1 ? false : true,
+                nextPage:
+                parseInt(orderCount) / parseInt(pageSize) <= parseInt(pageNumber)
+                    ? false
+                    : true,
+                totalPages: Math.ceil(parseInt(orderCount) / parseInt(pageSize)),
+            };
+        }
+        
+        return response(false, null, resMessage.success, {
+            result,
+            meta,
+            usesDetails : req.user
+        });
 	} catch (error) {
 		throw response(true, null, error.message, error.stack);
 	}

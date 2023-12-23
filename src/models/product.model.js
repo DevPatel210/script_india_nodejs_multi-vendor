@@ -32,10 +32,10 @@ const productSchema = new mongoose.Schema({
 		type: Number,
 		required: true,
 	},
-	offer_price: {
-		type: Number,
-		required: true,
-	},
+	// offer_price: {
+	// 	type: Number,
+	// 	required: true,
+	// },
 	image: {
 		type: Array,
 		required: true,

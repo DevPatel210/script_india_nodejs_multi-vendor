@@ -12,6 +12,11 @@ const orderSchema = new mongoose.Schema(
 			ref: "Cart",
 			required: true,
 		},
+		vendors: [{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Vendor",
+			required: true,
+		}],
 		accounting: {
 			type: Object,
 			required: true,
