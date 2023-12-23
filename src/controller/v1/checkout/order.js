@@ -16,7 +16,7 @@ exports.get = async (req) => {
         let result = {};
         let matchCondition = { 
             $and: [
-                { user_id: req.user._id },
+                { user_id: req.user ? req.user._id :req.vendor._id },
                 { status: { $ne: 'D' } }
             ]
         };
@@ -73,7 +73,7 @@ exports.get = async (req) => {
             
             result = result.map((order) => {
                 const filteredOrder = {...order};
-                const filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId==req.vendor._id);
+                const filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id);
                 let totalPrice = 0;
                 for(let product of filteredProducts){
                     totalPrice += product.totalPrice;
@@ -129,7 +129,7 @@ exports.get = async (req) => {
             usesDetails : req.user
         });
 	} catch (error) {
-		throw response(true, null, error.message, error.stack);
+        throw response(true, null, error.message, error.stack);
 	}
 };
 

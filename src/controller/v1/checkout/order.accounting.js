@@ -35,7 +35,7 @@ exports.accounting = async (req) => {
 			var cartAccountingItem = {};
 			cartAccountingItem["productId"] = newProduct._id;
 			cartAccountingItem["vendorId"] = newProduct.vendor;
-			vendorset.add(newProduct.vendor);
+			vendorset.add(newProduct.vendor.toString());
 			cartAccountingItem["productName"] = newProduct.title || "";
 			cartAccountingItem["unitPrice"] = newProduct.price || 0;
 			let vendor = vendors[newProduct.vendor];
@@ -61,7 +61,6 @@ exports.accounting = async (req) => {
 			cart_id: cartId,
 			amountToCharge: orderAccounting.finalTotal,
 		};
-        console.log(orderAccounting);
 		var paymentCred = await createPaymentIntent(payload);
         var paymentId = paymentCred.id;
 
