@@ -16,16 +16,37 @@ exports.findAll = async (req) => {
 		const pageSize = 10;
 		const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
 		const sortCriteria = { _id: -1 };
+		const searchValue = req.query.search;
 		let vendors = await makeMongoDbServiceVendor.getDocumentByQuery({
 			status: { $ne: 'D'}
 		});
 		vendors = vendors.reduce((obj, item) => (obj[item._id] = item, obj) ,{});
 
+		const matchCondition = { };
+		if (searchValue && searchValue.trim() !== "") {
+			matchCondition.$and = [
+				{
+					$or: [
+						{ title: { $regex: searchValue, $options: "i" } },
+						{ sub_title: { $regex: searchValue, $options: "i" } },
+						{ author: { $regex: searchValue, $options: "i" } },
+						{ description: { $regex: searchValue, $options: "i" } },
+						{ category: { $regex: searchValue, $options: "i" } },
+					],
+				},
+			];
+		}
+
 		let productsList, productCount;
 		if(req.isVendor){
+			if(!matchCondition.$and){
+				matchCondition = { vendor: req.vendor._id, status: { $ne: "D" } }
+			}else{
+				matchCondition.$and.push({ vendor: req.vendor._id, status: { $ne: "D" } })
+			}
 			productsList =
 				await makeMongoDbService.getDocumentByCustomAggregation([
-					{ $match: { vendor: req.vendor._id, status: { $ne: "D" } } },
+					{ $match: matchCondition },
 					{
 						$project: {
 							title: 1,
@@ -46,11 +67,16 @@ exports.findAll = async (req) => {
 					{ $skip: skip },
 					{ $limit: pageSize },
 				]);
-			productCount = await makeMongoDbService.getCountDocumentByQuery({ vendor: req.vendor._id, status: { $ne: "D" } });
+			productCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
 		}else{
+			if(!matchCondition.$and){
+				matchCondition = { status: { $ne: "D" } }
+			}else{
+				matchCondition.$and.push({ status: { $ne: "D" } })
+			}
 			productsList =
 				await makeMongoDbService.getDocumentByCustomAggregation([
-					{ $match: { status: { $ne: "D" } } },
+					{ $match: matchCondition },
 					{
 						$project: {
 							title: 1,
@@ -71,7 +97,7 @@ exports.findAll = async (req) => {
 					{ $skip: skip },
 					{ $limit: pageSize },
 				]);
-			productCount = await makeMongoDbService.getCountDocumentByQuery({ status: { $ne: "D" } });
+			productCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
 		}
 
 		productsList = productsList.map((product) => {
