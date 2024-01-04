@@ -22,7 +22,7 @@ exports.findAll = async (req) => {
 		});
 		vendors = vendors.reduce((obj, item) => (obj[item._id] = item, obj) ,{});
 
-		const matchCondition = { };
+		let matchCondition = { };
 		if (searchValue && searchValue.trim() !== "") {
 			matchCondition.$and = [
 				{
