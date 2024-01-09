@@ -9,6 +9,9 @@ exports.get = async (req) => {
 	try {
         let meta = {};
         const pageNumber = parseInt(req.query.pageNumber);
+        if (isNaN(pageNumber) || pageNumber < 1) {
+			throw new Error('Invalid pageNumber');
+		}
         const pageSize = 10;
         const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
         const sortCriteria = { _id: -1 };
