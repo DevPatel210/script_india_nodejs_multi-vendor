@@ -110,6 +110,7 @@ exports.findAll = async (req) => {
 			}
 			return {
 				...product,
+				vendorDetails: (!vendor || vendor.status == "D") ? {} : {email: vendor.email, first_name: vendor.first_name, last_name: vendor.last_name, commission: vendor.commission},
 				commission: ((product.price*vendor.commission)/100),
 				finalPrice: product.price + ((product.price*vendor.commission)/100),
 			}

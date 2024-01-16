@@ -2,6 +2,10 @@ const { Order } = require("../../../models/order.model");
 const makeMongoDbService = require("../../../services/mongoDbService")({
 	model: Order,
 });
+const { Product } = require("../../../models/product.model");
+const makeMongoDbServiceProduct = require("../../../services/mongoDbService")({
+	model: Product,
+});
 const { response, resMessage } = require("../../../helpers/common");
 const { default: mongoose } = require("mongoose");
 
@@ -23,6 +27,11 @@ exports.get = async (req) => {
                 { status: { $ne: 'D' } }
             ]
         };
+
+        let products = await makeMongoDbServiceProduct.getDocumentByQuery({
+			status: { $ne: 'D'}
+		});
+		products = products.reduce((obj, item) => (obj[item._id] = item, obj) ,{});
 
 		if(req.user && req.user.isAdmin === true){
             if(req.query.order_id && req.query.order_id !== ''){
@@ -125,6 +134,19 @@ exports.get = async (req) => {
                 totalPages: Math.ceil(parseInt(orderCount) / parseInt(pageSize)),
             };
         }
+
+        result = result.map((order) => {
+            const filteredOrder = {...order};
+            filteredOrder.accounting.cartAccountingList = order.accounting.cartAccountingList.map((product)=>{
+                // console.log(product);
+                const productDetails = products[product.productId.toString()]
+                return {
+                    ...product,
+                    productDetails: (!productDetails) ? {} : productDetails
+                }
+            });
+            return filteredOrder     
+        })
         
         return response(false, null, resMessage.success, {
             result,
