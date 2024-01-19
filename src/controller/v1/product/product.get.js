@@ -156,6 +156,7 @@ exports.findById = async (req) => {
 		}
 		isProduct = {
 			...isProduct._doc,
+			vendorDetails: {email: vendor.email, first_name: vendor.first_name, last_name: vendor.last_name, commission: vendor.commission},
 			commission: ((isProduct.price*vendor.commission)/100),
 			finalPrice: isProduct.price + ((isProduct.price*vendor.commission)/100),
 		}
