@@ -3,6 +3,7 @@ const { Cart } = require("../../../models/cart.model");
 const { Vendor } = require("../../../models/vendor.model");
 const { createPaymentIntent } = require("../../../services/payment");
 const { Order } = require("../../../models/order.model");
+const { Product } = require("../../../models/product.model");
 
 const makeMongoDbServiceCart = require("../../../services/mongoDbService")({
 	model: Cart,
@@ -12,6 +13,9 @@ const makeMongoDbServiceOrder = require("../../../services/mongoDbService")({
 });
 const makeMongoDbServiceVendor = require("../../../services/mongoDbService")({
 	model: Vendor,
+});
+const makeMongoDbServiceProduct = require("../../../services/mongoDbService")({
+	model: Product,
 });
 
 exports.accounting = async (req) => {
@@ -23,6 +27,10 @@ exports.accounting = async (req) => {
 			status: { $ne: 'D'}
 		});
 		vendors = vendors.reduce((obj, item) => (obj[item._id] = item, obj) ,{});
+		let products = await makeMongoDbServiceProduct.getDocumentByQuery({
+			status: { $ne: 'D'}
+		});
+		products = products.reduce((obj, item) => (obj[item._id] = item, obj) ,{});
 		let cartData = await makeMongoDbServiceCart.getSingleDocumentByIdPopulate(
 			cartId,
 			null,
@@ -47,15 +55,15 @@ exports.accounting = async (req) => {
 			cartAccountingItem["quantity"] = productListitem.quantity;
 			cartAccountingItem["totalCommission"] = cartAccountingItem["unitCommission"] * cartAccountingItem["quantity"];
 			cartAccountingItem["totalPrice"] = cartAccountingItem["finalUnitPrice"] * cartAccountingItem["quantity"];
-            cartAccountingList.push(cartAccountingItem);
+      cartAccountingList.push(cartAccountingItem);
 		}
 
 		let finalTotal = 0;
 		for (let index = 0; index < cartAccountingList.length; index++) {
-            const cartAccountingItem = cartAccountingList[index];
-            finalTotal += cartAccountingItem["totalPrice"];
-        }
-        orderAccounting.finalTotal = parseInt(finalTotal);
+			const cartAccountingItem = cartAccountingList[index];
+			finalTotal += cartAccountingItem["totalPrice"];
+		}
+    orderAccounting.finalTotal = parseInt(finalTotal);
 		orderAccounting.cartAccountingList = cartAccountingList;
 		let payload = {
 			cart_id: cartId,
@@ -72,6 +80,14 @@ exports.accounting = async (req) => {
 			paymentId: paymentId,
 			payment_status: "I",
 		});
+
+		orderAccounting.cartAccountingList = orderAccounting.cartAccountingList.map((list) => {
+			const productDetails = products[list.productId.toString()]
+			return {
+				...list,
+				productDetails: (!productDetails) ? {} : productDetails
+			}
+		})
 
 		return response(false, resMessage.success, null, {
 			...orderAccounting,
