@@ -17,10 +17,12 @@ const productSchema = new mongoose.Schema({
 		required: true,
 	},
 	subTitle: {
-		type: String		
+		type: String
+		
 	},
 	author: {
 		type: String
+		
 	},
 	description: {
 		type: String,

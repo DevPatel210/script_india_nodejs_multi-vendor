@@ -4,8 +4,8 @@ module.exports = {
             
   addProduct: [
     body("title", "title can not be empty").notEmpty().isString(),
-    body("subTitle", "subTitle can not be empty").notEmpty().isString(),
-    body("author", "author can not be empty").notEmpty().isString(),
+    body("subTitle", "subTitle can not be empty").optional().notEmpty().isString(),
+    body("author", "author can not be empty").optional().notEmpty().isString(),
     body("description", "description can not be empty").notEmpty().isString(),
     body("price", "price can not be empty").notEmpty().isNumeric(),
     body("image", "image can not be empty").notEmpty().isArray(),
