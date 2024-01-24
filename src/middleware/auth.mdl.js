@@ -82,7 +82,7 @@ exports.isAdmin = async (req, res, next) => {
 					return decoded;
 				}
 			);	
-			if (decoded._id === "64a9a1908d34f28458d3398f") {
+			if (decoded._id === "65af9e83bf2db94e4cf483be") {
 				req.isAdmin = true;
 				next();
 			} else {
