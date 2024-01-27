@@ -12,13 +12,13 @@ const makeMongoDbServiceProduct = makeMongoDbService({model: Product});
 // return all users count.
 exports.user = async (req) => {
   try {
-    // if (req.user && req.user.isAdmin) {
+    if (req.isAdmin) {
       let userCount = await makeMongoDbServiceUser.getCountDocumentByQuery({status: { $ne: 'D'}});
       return response(false, null, resMessage.success, {
         count: userCount
       });
-    // }
-    // return response(true, null, resMessage.failed);
+    }
+    return response(true, null, resMessage.failed);
   } catch (error) {
     return response(true, null, error.message, error.stack);
   }
@@ -27,13 +27,13 @@ exports.user = async (req) => {
 // return all vendors count.
 exports.vendor = async (req) => {
   try {
-    // if (req.user && req.user.isAdmin) {
+    if (req.isAdmin) {
       let vendorCount = await makeMongoDbServiceVendor.getCountDocumentByQuery({status: { $ne: 'D'}});
       return response(false, null, resMessage.success, {
         count: vendorCount
       });
-    // }
-    // return response(true, null, resMessage.failed);
+    }
+    return response(true, null, resMessage.failed);
   } catch (error) {
     return response(true, null, error.message, error.stack);
   }
@@ -42,13 +42,13 @@ exports.vendor = async (req) => {
 // return all orders count.
 exports.order = async (req) => {
   try {
-    // if (req.user && req.user.isAdmin) {
+    if (req.isAdmin) {
       let orderCount = await makeMongoDbServiceOrder.getCountDocumentByQuery({status: { $ne: 'D'}});
       return response(false, null, resMessage.success, {
         count: orderCount
       });
-    // }
-    // return response(true, null, resMessage.failed);
+    }
+    return response(true, null, resMessage.failed);
   } catch (error) {
     return response(true, null, error.message, error.stack);
   }
@@ -57,13 +57,13 @@ exports.order = async (req) => {
 // return all products count.
 exports.product = async (req) => {
   try {
-    // if (req.user && req.user.isAdmin) {
+    if (req.isAdmin) {
       let productCount = await makeMongoDbServiceProduct.getCountDocumentByQuery({status: { $ne: 'D'}});
       return response(false, null, resMessage.success, {
         count: productCount
       });
-    // }
-    // return response(true, null, resMessage.failed);
+    }
+    return response(true, null, resMessage.failed);
   } catch (error) {
     return response(true, null, error.message, error.stack);
   }

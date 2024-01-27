@@ -4,15 +4,15 @@ const count = require("../controller/v1/count")
 const { verifyToken, isAdmin } = require("../middleware/auth.mdl");
 
 // Get all users count
-router.get("/user", count.user);
+router.get("/user", isAdmin, count.user);
 
 // Get all vendors count
-router.get("/vendor", count.vendor);
+router.get("/vendor", isAdmin, count.vendor);
 
 // Get all products count
-router.get("/product", count.product);
+router.get("/product", isAdmin, count.product);
 
 // Get all orders count
-router.get("/order", count.order);
+router.get("/order", isAdmin, count.order);
 
 module.exports = router;
