@@ -68,3 +68,40 @@ exports.product = async (req) => {
     return response(true, null, error.message, error.stack);
   }
 };
+
+// return all orders count for a vendor.
+exports.orderVendor = async (req) => {
+  try {
+    if (req.isVendor) {
+      let matchCondition = {
+        $and: [
+          { vendors: { $in: [req.vendor._id] } },
+          { status: { $ne: 'D' } }
+        ]
+      }
+      let orderCount = await makeMongoDbServiceOrder.getCountDocumentByQuery(matchCondition);
+      return response(false, null, resMessage.success, {
+        count: orderCount
+      });
+    }
+    return response(true, null, resMessage.failed);
+  } catch (error) {
+    return response(true, null, error.message, error.stack);
+  }
+};
+
+// return all products count for a vendor.
+exports.productVendor = async (req) => {
+  try {
+    if (req.isVendor) {
+      const matchCondition = { vendor: req.vendor._id, status: { $ne: "D" } }
+      let productCount = await makeMongoDbServiceProduct.getCountDocumentByQuery(matchCondition);
+      return response(false, null, resMessage.success, {
+        count: productCount
+      });
+    }
+    return response(true, null, resMessage.failed);
+  } catch (error) {
+    return response(true, null, error.message, error.stack);
+  }
+};
