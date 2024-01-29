@@ -23,7 +23,7 @@ const orderSchema = new mongoose.Schema(
 		},
 		status: {
 			type: String,
-			default: "P", // A,C,P,D
+			default: "P", // A,C,P,D,R(Received)
 			minlength: 1,
 			maxlength: 1,
 		},
