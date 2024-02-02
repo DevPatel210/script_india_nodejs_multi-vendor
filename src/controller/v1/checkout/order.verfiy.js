@@ -24,7 +24,7 @@ exports.verifyOrder = async (req) => {
 				{ paymentId },
 				{ payment_status: "P" }
 			);
-			return response(false, "Order payment is incomplete.", null, order);
+			return response(true, "Order payment is incomplete.", null, order);
 		}
 	} catch (error) {
 		throw response(true, null, error.message, error.stack);
