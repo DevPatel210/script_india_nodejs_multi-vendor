@@ -22,6 +22,7 @@ exports.get = async (req) => {
 
 		let cartItems = [];
 		for(let product of result.cartItems) {
+			quantity = product._doc.quantity;
 			product = product._doc.product;
 			let vendor = vendors[product.vendor];
 			if (!vendor || vendor.status == "D") {
@@ -29,8 +30,9 @@ exports.get = async (req) => {
 			}
 			cartItems.push({
 				...product._doc,
-				commission: ((product.price*vendor.commission)/100),
-				finalPrice: product.price + ((product.price*vendor.commission)/100),
+				quantity,
+				commission: ((product.price*quantity*vendor.commission)/100),
+				finalPrice: (product.price + ((product.price*vendor.commission)/100))*quantity,
 				vendor: (!vendor || vendor.status == "D") ? {} : vendor
 			});
 		}
