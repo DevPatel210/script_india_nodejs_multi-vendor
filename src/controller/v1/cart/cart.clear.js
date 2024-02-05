@@ -18,3 +18,31 @@ exports.clear = async (req) => {
 		throw response(true, null, error.message, error.stack);
 	}
 };
+
+exports.removeProductFromCart = async (req) => {
+	try {
+		const { _id } = req.user;
+		const {productId} = req.body;
+		console.log({_id,productId})
+		const cart = await Cart.findOne({ user: _id })
+		console.log(cart)
+		if (cart) {
+			const cartItemIndex = cart.cartItems.findIndex(
+				(item) => item.product.toString() === productId
+			);
+			if (cartItemIndex != -1) {
+				cart.cartItems.splice(cartItemIndex,1);
+				await cart.save();
+			} else {
+				return response(true, resMessage.productNotFoundInCart, null);
+			}
+		} else {
+			return response(true, 'Cart '+resMessage.notFound, null);
+		}
+
+		return response(false, resMessage.success, null, cart);
+	} catch (error) {
+		console.log(error)
+		throw response(true, null, error.message, error.stack);
+	}
+}

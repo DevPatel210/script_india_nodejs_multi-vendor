@@ -10,6 +10,8 @@ router.post("/add", validate(rules.add), cart.add);
 
 router.post("/clear", cart.clear);
 
+router.post("/removeProduct", validate(rules.removeProductFromCart), cart.removeProductFromCart);
+
 router.get("/get", cart.get);
 
 router.post("/checkout", validate(rules.checkout), order.checkout);

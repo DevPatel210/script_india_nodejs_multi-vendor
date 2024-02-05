@@ -9,6 +9,10 @@ module.exports = {
 	checkout: [
 		body("cartId", "Enter valid cart id").notEmpty().isString().isMongoId(),
 	],
+	
+	removeProductFromCart: [
+		body("productId", "Enter valid product id").notEmpty().isString().isMongoId(),
+	],
 
 	verifyOrder: [
 		body("paymentId", "Enter valid payment id").notEmpty().isString(),

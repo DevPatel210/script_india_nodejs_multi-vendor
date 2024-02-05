@@ -11,6 +11,10 @@ exports.clear = (req, res) => {
     handleResponse(cartClear.clear(req), res);
 }
 
+exports.removeProductFromCart = (req, res) => {
+    handleResponse(cartClear.removeProductFromCart(req), res);
+}
+
 exports.get = (req, res) => {
     handleResponse(cartGet.get(req), res);
 }

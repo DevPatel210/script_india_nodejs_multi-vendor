@@ -17,5 +17,6 @@ module.exports = {
   notFound: "Not Found.",
   alreadyExist: "Data Already exist.",
   inCorrectCred: "Email and password is not correct",
-  orderNotFound: "Order not found."
+  orderNotFound: "Order not found.",
+  productNotFoundInCart: "Product is not present in the cart."
 };
