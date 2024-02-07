@@ -19,6 +19,8 @@ module.exports = {
       .isLength({ min: 8 }),
     body("address", "Invalid address").notEmpty().isString(),
     body("city", "Invalid address").notEmpty().isString(),
+    body("state", "Invalid state").notEmpty().isString(),
+    body("country", "Invalid country").notEmpty().isString(),
     body("pincode", "Invalid pincode").notEmpty().isString(),
     body("phone_number", "Invalid phone_number").notEmpty().isNumeric(),
     body("status", "Invalid status").optional().isIn(["A", "D"]).default('A').notEmpty().isString(),
@@ -48,6 +50,8 @@ module.exports = {
 			.isLength({ min: 8 }),
 		body("address", "Invalid address").optional().notEmpty().isString(),
 		body("city", "Invalid address").optional().notEmpty().isString(),
+		body("state", "Invalid state").optional().notEmpty().isString(),
+		body("country", "Invalid country").optional().notEmpty().isString(),
 		body("status", "Invalid status")
 			.optional()
 			.isIn(["A", "D"])

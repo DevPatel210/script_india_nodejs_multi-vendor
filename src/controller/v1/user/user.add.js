@@ -35,6 +35,8 @@ exports.create = async (req) => {
 				"email",
 				"address",
 				"city",
+				"state",
+				"country",
 				"pincode",
 				"phone_number",
 			])
