@@ -16,23 +16,25 @@ exports.findAll = async (req) => {
       const pageSize = 10;
       const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
       const searchValue = req.query.search; // Replace with your actual search value
-      const matchCondition = { };
+      const matchCondition = { 
+        $and: [
+          {status: { $ne: 'D' }} 
+        ]
+      };
 
       if (searchValue && searchValue.trim() !== "") {
-        matchCondition.$and = [
-          {
-            $or: [
-              { first_name: { $regex: searchValue, $options: "i" } },
-              { last_name: { $regex: searchValue, $options: "i" } },
-              { email: { $regex: searchValue, $options: "i" } },
-              { password: { $regex: searchValue, $options: "i" } },
-              { address: { $regex: searchValue, $options: "i" } },
-              { city: { $regex: searchValue, $options: "i" } },
-              { pincode: { $regex: searchValue, $options: "i" } },
-              { phone_number: { $regex: searchValue, $options: "i" } },
-            ],
-          },
-        ];
+        matchCondition['$and'].push({
+          $or: [
+            { first_name: { $regex: searchValue, $options: "i" } },
+            { last_name: { $regex: searchValue, $options: "i" } },
+            { email: { $regex: searchValue, $options: "i" } },
+            { password: { $regex: searchValue, $options: "i" } },
+            { address: { $regex: searchValue, $options: "i" } },
+            { city: { $regex: searchValue, $options: "i" } },
+            { pincode: { $regex: searchValue, $options: "i" } },
+            { phone_number: { $regex: searchValue, $options: "i" } },
+          ],
+        });
       }
       const sortCriteria = { _id: -1 }; // Sort by the '_id' field in descending order (newest first)
 
@@ -57,7 +59,7 @@ exports.findAll = async (req) => {
         { $limit: pageSize },
       ]);
 
-      let userCount = await makeMongoDbService.getCountDocumentByQuery({});
+      let userCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
 
       meta = {
         pageNumber,
@@ -87,7 +89,7 @@ exports.findById = async (req) => {
     const id = (req.user && req.user.isAdmin) ? req.query.id : req.user._id;
     let isuser = await makeMongoDbService.getSingleDocumentById(id)
     
-    if (!isuser) {
+    if (!isuser || isuser.status == "D") {
       return response(true, null, resMessage.failed);
     }
 

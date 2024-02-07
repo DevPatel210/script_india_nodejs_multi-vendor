@@ -34,9 +34,10 @@ exports.getAll = async (req) => {
 		if (product_id) {
 			reviews = await makeMongoDbService.getDocumentByQueryPopulate({
 				product: product_id,
+				status: { $ne: 'D' }
 			},null,["user","product"]);
 		} else {
-			reviews = await makeMongoDbService.getDocumentByQueryPopulate({}, null, [
+			reviews = await makeMongoDbService.getDocumentByQueryPopulate({status:{ $ne: 'D' }}, null, [
 				"user",
 				"product",
 			]);

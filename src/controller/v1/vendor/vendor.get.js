@@ -16,18 +16,20 @@ exports.findAll = async (req) => {
       const pageSize = 10;
       const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
       const searchValue = req.query.search; // Replace with your actual search value
-      const matchCondition = { };
+      const matchCondition = { 
+        $and: [
+          {status: { $ne: 'D' }} 
+        ]
+      };
 
       if (searchValue && searchValue.trim() !== "") {
-        matchCondition.$and = [
-          {
-            $or: [
-              { first_name: { $regex: searchValue, $options: "i" } },
-              { last_name: { $regex: searchValue, $options: "i" } },
-              { email: { $regex: searchValue, $options: "i" } },
-            ],
-          },
-        ];
+        matchCondition['$and'].push({
+          $or: [
+            { first_name: { $regex: searchValue, $options: "i" } },
+            { last_name: { $regex: searchValue, $options: "i" } },
+            { email: { $regex: searchValue, $options: "i" } },
+          ],
+        });
       }
       const sortCriteria = { _id: -1 }; // Sort by the '_id' field in descending order (newest first)
 
@@ -48,7 +50,7 @@ exports.findAll = async (req) => {
         { $limit: pageSize },
       ]);
 
-      let vendorCount = await makeMongoDbService.getCountDocumentByQuery({});
+      let vendorCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
 
       meta = {
         pageNumber,
@@ -78,7 +80,7 @@ exports.findById = async (req) => {
     const id = req.query.id;
     let isVendor = await makeMongoDbService.getSingleDocumentById(id)
     
-    if (!isVendor) {
+    if (!isVendor|| isVendor.status == "D") {
       return response(true, null, resMessage.failed);
     }
 

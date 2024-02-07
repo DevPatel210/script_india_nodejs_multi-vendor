@@ -19,6 +19,7 @@ exports.get = async (req) => {
         const pageSize = 10;
         const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
         const sortCriteria = { _id: -1 };
+        const searchValue = req.query.search || '';
         let orderCount = 0;
         let result = {};
         let matchCondition = { 
@@ -28,6 +29,16 @@ exports.get = async (req) => {
             ]
         };
 
+        if (searchValue && searchValue.trim() !== "") {
+			matchCondition['$and'].push({
+                $or: [
+                    { user_id: { $regex: searchValue, $options: "i" } },
+                    { cart_id: { $regex: searchValue, $options: "i" } },
+                    { status: { $regex: searchValue, $options: "i" } },
+                ],
+            });
+		}
+
         let products = await makeMongoDbServiceProduct.getDocumentByQuery({
 			status: { $ne: 'D'}
 		});
@@ -36,9 +47,32 @@ exports.get = async (req) => {
 		if(req.user && req.user.isAdmin === true){
             if(req.query.order_id && req.query.order_id !== ''){
                 matchCondition = {
-                    _id: new mongoose.Types.ObjectId(req.query.order_id)
+                    $and: [
+                        { _id: new mongoose.Types.ObjectId(req.query.order_id)},
+                        { status: { $ne: 'D' } }
+                    ],
+                    $or: [
+                        { title: { $regex: searchValue, $options: "i" } },
+                        { sub_title: { $regex: searchValue, $options: "i" } },
+                        { author: { $regex: searchValue, $options: "i" } },
+                        { description: { $regex: searchValue, $options: "i" } },
+                        { category: { $regex: searchValue, $options: "i" } },
+                    ],
                 }
-            }else { matchCondition = {} }
+            }else { 
+                matchCondition = { 
+                    $and: [
+                        {status: { $ne: 'D' } },
+                    ],
+                    $or: [
+                        { title: { $regex: searchValue, $options: "i" } },
+                        { sub_title: { $regex: searchValue, $options: "i" } },
+                        { author: { $regex: searchValue, $options: "i" } },
+                        { description: { $regex: searchValue, $options: "i" } },
+                        { category: { $regex: searchValue, $options: "i" } },
+                    ],
+                }
+            }
             result = await makeMongoDbService.getDocumentByCustomAggregation([
                 { $match: matchCondition},
                 { $sort: sortCriteria },
