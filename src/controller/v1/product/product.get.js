@@ -1,11 +1,15 @@
 const { response, resMessage } = require("../../../helpers/common");
 const { Product } = require("../../../models/product.model");
 const { Vendor } = require("../../../models/vendor.model");
+const Review = require("../../../models/review.model");
 const makeMongoDbService = require("../../../services/mongoDbService")({
 	model: Product,
 });
 const makeMongoDbServiceVendor = require("../../../services/mongoDbService")({
 	model: Vendor,
+});
+const makeMongoDbServiceReview = require("../../../services/mongoDbService")({
+	model: Review,
 });
 
 // Retrieve and return all products from the database.
@@ -103,18 +107,24 @@ exports.findAll = async (req) => {
 			productCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
 		}
 
-		productsList = productsList.map((product) => {
+		productsList = await Promise.all(productsList.map(async (product) => {
 			let vendor = vendors[product.vendor];
 			if (!vendor || vendor.status == "D") {
 				vendor = {commission: 0};
 			}
+			let reviews = await makeMongoDbServiceReview.getDocumentByQueryPopulate({
+				product: product._id.toString(),
+				status: { $ne: 'D' }
+			},null,["user"]);
+
 			return {
 				...product,
+				reviews,
 				vendorDetails: (!vendor || vendor.status == "D") ? {} : {email: vendor.email, first_name: vendor.first_name, last_name: vendor.last_name, commission: vendor.commission},
 				commission: ((product.price*vendor.commission)/100),
 				finalPrice: product.price + ((product.price*vendor.commission)/100),
 			}
-		})
+		}));
 		meta = {
 			pageNumber,
 			pageSize,
@@ -154,13 +164,20 @@ exports.findById = async (req) => {
 		if (!vendor || vendor.status == "D") {
 			return response(true, null, resMessage.vendorNotFound,[],404);
 		}
+		
+		let reviews = await makeMongoDbServiceReview.getDocumentByQueryPopulate({
+			product: isProduct._id.toString(),
+			status: { $ne: 'D' }
+		},null,["user"]);
+
 		isProduct = {
 			...isProduct._doc,
+			reviews,
 			vendorDetails: {email: vendor.email, first_name: vendor.first_name, last_name: vendor.last_name, commission: vendor.commission},
 			commission: ((isProduct.price*vendor.commission)/100),
 			finalPrice: isProduct.price + ((isProduct.price*vendor.commission)/100),
 		}
-		return response(false, null, resMessage.success, isProduct,[],200);
+		return response(false, null, resMessage.success, isProduct,200);
 	} catch (error) {
 		return response(true, null, error.message, error.stack,500);
 	}
