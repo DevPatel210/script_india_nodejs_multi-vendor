@@ -69,6 +69,27 @@ exports.product = async (req) => {
   }
 };
 
+// return all counts for admin.
+exports.allCounts = async (req) => {
+  try {
+    if (req.isAdmin) {
+      let userCount = await makeMongoDbServiceUser.getCountDocumentByQuery({status: { $ne: 'D'}});
+      let vendorCount = await makeMongoDbServiceVendor.getCountDocumentByQuery({status: { $ne: 'D'}});
+      let orderCount = await makeMongoDbServiceOrder.getCountDocumentByQuery({status: { $ne: 'D'}});
+      let productCount = await makeMongoDbServiceProduct.getCountDocumentByQuery({status: { $ne: 'D'}});
+      return response(false, null, resMessage.success, {
+        user: userCount,
+        product: productCount,
+        order: orderCount,
+        vendor: vendorCount
+      });
+    }
+    return response(true, null, resMessage.failed);
+  } catch (error) {
+    return response(true, null, error.message, error.stack);
+  }
+};
+
 // return all orders count for a vendor.
 exports.orderVendor = async (req) => {
   try {
@@ -98,6 +119,31 @@ exports.productVendor = async (req) => {
       let productCount = await makeMongoDbServiceProduct.getCountDocumentByQuery(matchCondition);
       return response(false, null, resMessage.success, {
         count: productCount
+      });
+    }
+    return response(true, null, resMessage.failed);
+  } catch (error) {
+    return response(true, null, error.message, error.stack);
+  }
+};
+
+// return all counts for vendor.
+exports.allCountsVendor = async (req) => {
+  try {
+    if (req.isVendor) {
+      let matchCondition = { vendor: req.vendor._id, status: { $ne: "D" } }
+      let productCount = await makeMongoDbServiceProduct.getCountDocumentByQuery(matchCondition);
+      
+      matchCondition = {
+        $and: [
+          { vendors: { $in: [req.vendor._id] } },
+          { status: { $ne: 'D' } }
+        ]
+      }
+      let orderCount = await makeMongoDbServiceOrder.getCountDocumentByQuery(matchCondition);
+      return response(false, null, resMessage.success, {
+        order: orderCount,
+        product: productCount,
       });
     }
     return response(true, null, resMessage.failed);

@@ -15,10 +15,16 @@ router.get("/product", isAdmin, count.product);
 // Get all orders count
 router.get("/order", isAdmin, count.order);
 
+// Get all count for admin
+router.get("/all", isAdmin, count.allCounts);
+
 // Get all orders of a vendor count
 router.get("/vendor-order", isVendor, count.orderVendor);
 
 // Get all products of a vendor count
 router.get("/vendor-product", isVendor, count.productVendor);
+
+// Get all counts for a vendor
+router.get("/vendor-all", isVendor, count.allCountsVendor);
 
 module.exports = router;

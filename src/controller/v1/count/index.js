@@ -17,10 +17,18 @@ exports.product = (req, res) => {
 	handleResponse(countGet.product(req), res);
 };
 
+exports.allCounts = (req, res) => {
+	handleResponse(countGet.allCounts(req), res);
+};
+
 exports.productVendor = (req, res) => {
 	handleResponse(countGet.productVendor(req), res);
 };
 
 exports.orderVendor = (req, res) => {
 	handleResponse(countGet.orderVendor(req), res);
+};
+
+exports.allCountsVendor = (req, res) => {
+	handleResponse(countGet.allCountsVendor(req), res);
 };
