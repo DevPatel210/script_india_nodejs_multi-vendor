@@ -186,9 +186,9 @@ exports.get = async (req) => {
             result,
             meta,
             usesDetails : req.user
-        });
+        },200);
 	} catch (error) {
-        throw response(true, null, error.message, error.stack);
+        throw response(true, null, error.message, error.stack,500);
 	}
 };
 
@@ -198,7 +198,7 @@ exports.update = async (req) => {
         let isorder = await makeMongoDbService.getDocumentById(req.body.order_id);
     
         if (!isorder) {
-          return response(true, resMessage.orderNotFound, null);
+          return response(true, resMessage.orderNotFound, null,[],404);
         }
         const orderData = req.body; 
         const updatedOrder = await makeMongoDbService.findOneAndUpdateDocument(
@@ -206,9 +206,9 @@ exports.update = async (req) => {
           orderData
         );
     
-        return response(false, resMessage.userUpdated, null, updatedOrder);
+        return response(false, resMessage.userUpdated, null, updatedOrder,200);
         } catch (error) {
-        throw response(true, null, error.message, error.stack);
+        throw response(true, null, error.message, error.stack,500);
     }
 }
 
@@ -218,15 +218,15 @@ exports.delete = async (req) => {
         let isorder = await makeMongoDbService.getDocumentById(req.body.order_id);
     
         if (!isorder) {
-          return response(true, resMessage.orderNotFound, null);
+          return response(true, resMessage.orderNotFound, null,[],404);
         }
         const updatedOrder = await makeMongoDbService.findOneAndUpdateDocument(
           { _id: req.body.order_id },
           {status: 'D'}
         );
     
-        return response(false, "Order Delete Successfully", null, updatedOrder);
+        return response(false, "Order Delete Successfully", null, updatedOrder,200);
         } catch (error) {
-        throw response(true, null, error.message, error.stack);
+        throw response(true, null, error.message, error.stack,500);
     }
 }

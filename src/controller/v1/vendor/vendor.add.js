@@ -18,7 +18,7 @@ exports.create = async (req) => {
 			[]
 		);
 		if (vendor) {
-			return response(true, resMessage.alreadyExist, "null");
+			return response(true, resMessage.alreadyExist, "null",[],400);
 		}
 		req.body.password = await hashPassword(req.body.password);
 		const vendorData = req.body;
@@ -33,9 +33,10 @@ exports.create = async (req) => {
 				"first_name",
 				"last_name",
 				"email",
-			])
+			]),
+			201
 		);
 	} catch (error) {
-		return response(true, null, error.message, error.stack);
+		return response(true, null, error.message, error.stack,500);
 	}
 };

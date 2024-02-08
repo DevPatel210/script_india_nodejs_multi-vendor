@@ -92,8 +92,8 @@ exports.accounting = async (req) => {
 		return response(false, resMessage.success, null, {
 			...orderAccounting,
 			paymentId,
-		});
+		},200);
 	} catch (error) {
-		throw response(true, null, error.message, error.stack);
+		throw response(true, null, error.message, error.stack,500);
 	}
 };

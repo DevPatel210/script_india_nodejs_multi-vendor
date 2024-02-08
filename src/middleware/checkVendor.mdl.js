@@ -5,7 +5,7 @@ exports.isVendorAuth = async (req, res, next) => {
     if (!req.isVendor && !(req.user && req.user.isAdmin)) {
       return res
       .status(401)
-      .json(response(true, null, resMessage.unAuthorized));;
+      .json(response(true, null, resMessage.unAuthorized,[],401).data);
     }
     next();
   } catch (err) {

@@ -18,7 +18,9 @@ exports.login = async (req) => {
 			return response(
 				true,
 				resMessage.inCorrectCred,
-				"User not found."
+				"User not found.",
+				[],
+				404
 			);
 		}
 
@@ -27,7 +29,9 @@ exports.login = async (req) => {
 			return response(
 				true,
 				resMessage.inCorrectCred,
-				resMessage.invalidPassword
+				resMessage.invalidPassword,
+				[],
+				401
 			);
 
 		delete user.password;
@@ -40,9 +44,9 @@ exports.login = async (req) => {
 			token,
 			role: role,
 			user
-		});
+		},200);
 	} catch (error) {
-		return response(true, null, error.message);
+		return response(true, null, error.message,[],500);
 	}
 };
 
@@ -54,7 +58,9 @@ exports.vendorLogin = async (req) => {
 			return response(
 				true,
 				resMessage.inCorrectCred,
-				"Vendor not found."
+				"Vendor not found.",
+				[],
+				404
 			);
 		}
 
@@ -63,7 +69,9 @@ exports.vendorLogin = async (req) => {
 			return response(
 				true,
 				resMessage.inCorrectCred,
-				resMessage.invalidPassword
+				resMessage.invalidPassword,
+				[],
+				401
 			);
 
 		delete vendor.password;
@@ -72,8 +80,8 @@ exports.vendorLogin = async (req) => {
 			token,
 			role: 'vendor',
 			vendor
-		});
+		},200);
 	} catch (error) {
-		return response(true, null, error.message);
+		return response(true, null, error.message,[],500);
 	}
 };

@@ -12,18 +12,18 @@ exports.getById = async (req) => {
 	try {
 		let isReview = await makeMongoDbService.getSingleDocumentById(req.query.reviewId);
 		if (!isReview || isReview.status == "D") {
-			return response(true, resMessage.notFound, resMessage.notFound);
+			return response(true, resMessage.notFound, resMessage.notFound,[],404);
 		}
 		if (req.isVendor==true) {
 			const product = await makeMongoDbServiceProduct.getSingleDocumentById(isReview.product.toString());
 			if(product.vendor==req.vendor._id.toString()) {
-				return response(false, null, resMessage.success, isReview);
+				return response(false, null, resMessage.success, isReview,200);
 			}
-			return response(true, resMessage.notFound, resMessage.notFound);
+			return response(true, resMessage.notFound, resMessage.notFound,[],404);
 		}
-		return response(false, null, resMessage.success, isReview);
+		return response(false, null, resMessage.success, isReview,200);
 	} catch (error) {
-		return response(true, null, error.message, error.stack);
+		return response(true, null, error.message, error.stack,200);
 	}
 };
 
@@ -46,11 +46,10 @@ exports.getAll = async (req) => {
 			reviews = reviews.filter((review)=>review.product.vendor==req.vendor._id.toString())
 		}
 		if (reviews.length == 0) {
-			return response(true, resMessage.notFound, resMessage.notFound);
+			return response(true, resMessage.notFound, resMessage.notFound,[],404);
 		}
-		return response(false, null, resMessage.success, reviews);
+		return response(false, null, resMessage.success, reviews,200);
 	} catch (error) {
-		console.log(error);
-		return response(true, null, error.message);
+		return response(true, null, error.message,[],500);
 	}
 };

@@ -4,8 +4,8 @@ exports.isAdminAuth = async (req, res, next) => {
   try {
     if (!(req.user && req.user.isAdmin)) {
       return res
-      .status(200)
-      .json(response(true, null, resMessage.unAuthorized));;
+      .status(401)
+      .json(response(true, null, resMessage.unAuthorized,[],401).data);
     }
     next();
   } catch (err) {

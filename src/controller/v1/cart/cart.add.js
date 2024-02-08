@@ -26,8 +26,8 @@ exports.add = async (req) => {
 			}
 		});
 		
-		return response(false, resMessage.success, null, result);
+		return response(false, resMessage.success, null, result,201);
 	} catch (error) {
-		throw response(true, null, error.message, error.stack);
+		throw response(true, null, error.message, error.stack,500);
 	}
 };

@@ -19,15 +19,14 @@ exports.delete = async (req) => {
     }
 
     if (!isProduct || isProduct.status == "D") {
-      return response(true, resMessage.notFound, null);
+      return response(true, resMessage.notFound, null,[],404);
     }
     const deletedProduct = await makeMongoDbService.softDeleteDocument({
       _id: req.body.product_id,
     });
 
-    return response(false, resMessage.success, null, deletedProduct);
+    return response(false, resMessage.success, null, deletedProduct,200);
   } catch (error) {
-    console.log(error);
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };

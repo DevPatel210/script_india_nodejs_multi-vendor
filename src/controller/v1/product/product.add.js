@@ -16,9 +16,10 @@ exports.create = async (req) => {
       false,
       resMessage.success,
       null,
-      newProduct
+      newProduct,
+      201
     );
   } catch (error) {
-    throw response(true, null, error.message, error.stack);
+    throw response(true, null, error.message, error.stack,500);
   }
 };

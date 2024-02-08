@@ -13,7 +13,7 @@ exports.Update = async (req) => {
     let isVendor = await makeMongoDbServiceVendor.getDocumentById(id);
 
     if (!isVendor) {
-      return response(true, resMessage.vendorNotFound, null);
+      return response(true, resMessage.vendorNotFound, null,[],404);
     }
     const vendorData = req.body; // update vendor payload
     if(req.isVendor==true && vendorData.commission){
@@ -24,9 +24,8 @@ exports.Update = async (req) => {
       vendorData
     );
 
-    return response(false, resMessage.vendorUpdated, null, updatedVendor);
+    return response(false, resMessage.vendorUpdated, null, updatedVendor,200);
   } catch (error) {
-    console.log(error);
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };

@@ -18,15 +18,15 @@ exports.verifyOrder = async (req) => {
 				{ paymentId },
 				{ payment_status : "C"}
 			);
-			return response(false, "Payment received successfully.", null, order);
+			return response(false, "Payment received successfully.", null, order,200);
 		} else {
 			order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
 				{ paymentId },
 				{ payment_status: "P" }
 			);
-			return response(true, "Order payment is incomplete.", null, order);
+			return response(true, "Order payment is incomplete.", null, order,400);
 		}
 	} catch (error) {
-		throw response(true, null, error.message, error.stack);
+		throw response(true, null, error.message, error.stack,500);
 	}
 };

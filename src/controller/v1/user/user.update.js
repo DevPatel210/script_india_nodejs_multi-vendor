@@ -13,7 +13,7 @@ exports.Update = async (req) => {
     let isuser = await makeMongoDbServiceUser.getDocumentById(id);
 
     if (!isuser) {
-      return response(true, resMessage.userNotFound, null);
+      return response(true, resMessage.userNotFound, null,[],404);
     }
     const userData = req.body; // update user payload
     const updatedUser = await makeMongoDbServiceUser.findOneAndUpdateDocument(
@@ -21,9 +21,8 @@ exports.Update = async (req) => {
       userData
     );
 
-    return response(false, resMessage.userUpdated, null, updatedUser);
+    return response(false, resMessage.userUpdated, null, updatedUser,200);
   } catch (error) {
-    console.log(error);
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };

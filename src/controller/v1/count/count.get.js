@@ -16,11 +16,11 @@ exports.user = async (req) => {
       let userCount = await makeMongoDbServiceUser.getCountDocumentByQuery({status: { $ne: 'D'}});
       return response(false, null, resMessage.success, {
         count: userCount
-      });
+      },200);
     }
-    return response(true, null, resMessage.failed);
+    return response(true, null, resMessage.failed,[],403);
   } catch (error) {
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };
 
@@ -31,11 +31,11 @@ exports.vendor = async (req) => {
       let vendorCount = await makeMongoDbServiceVendor.getCountDocumentByQuery({status: { $ne: 'D'}});
       return response(false, null, resMessage.success, {
         count: vendorCount
-      });
+      },200);
     }
-    return response(true, null, resMessage.failed);
+    return response(true, null, resMessage.failed,[],403);
   } catch (error) {
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };
 
@@ -46,11 +46,11 @@ exports.order = async (req) => {
       let orderCount = await makeMongoDbServiceOrder.getCountDocumentByQuery({status: { $ne: 'D'}});
       return response(false, null, resMessage.success, {
         count: orderCount
-      });
+      },200);
     }
-    return response(true, null, resMessage.failed);
+    return response(true, null, resMessage.failed,[],403);
   } catch (error) {
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };
 
@@ -61,11 +61,11 @@ exports.product = async (req) => {
       let productCount = await makeMongoDbServiceProduct.getCountDocumentByQuery({status: { $ne: 'D'}});
       return response(false, null, resMessage.success, {
         count: productCount
-      });
+      },200);
     }
-    return response(true, null, resMessage.failed);
+    return response(true, null, resMessage.failed,[],403);
   } catch (error) {
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };
 
@@ -82,11 +82,11 @@ exports.allCounts = async (req) => {
         product: productCount,
         order: orderCount,
         vendor: vendorCount
-      });
+      },200);
     }
-    return response(true, null, resMessage.failed);
+    return response(true, null, resMessage.failed,[],403);
   } catch (error) {
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };
 
@@ -103,11 +103,11 @@ exports.orderVendor = async (req) => {
       let orderCount = await makeMongoDbServiceOrder.getCountDocumentByQuery(matchCondition);
       return response(false, null, resMessage.success, {
         count: orderCount
-      });
+      },200);
     }
-    return response(true, null, resMessage.failed);
+    return response(true, null, resMessage.failed,[],403);
   } catch (error) {
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };
 
@@ -119,11 +119,11 @@ exports.productVendor = async (req) => {
       let productCount = await makeMongoDbServiceProduct.getCountDocumentByQuery(matchCondition);
       return response(false, null, resMessage.success, {
         count: productCount
-      });
+      },200);
     }
-    return response(true, null, resMessage.failed);
+    return response(true, null, resMessage.failed,[],403);
   } catch (error) {
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };
 
@@ -144,10 +144,10 @@ exports.allCountsVendor = async (req) => {
       return response(false, null, resMessage.success, {
         order: orderCount,
         product: productCount,
-      });
+      },200);
     }
-    return response(true, null, resMessage.failed);
+    return response(true, null, resMessage.failed,[],403);
   } catch (error) {
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };

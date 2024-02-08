@@ -41,8 +41,8 @@ exports.get = async (req) => {
 			user: result.user,
 			cartItems: cartItems
 		}
-		return response(false, resMessage.success, null, finalResult);
+		return response(false, resMessage.success, null, finalResult,200);
 	} catch (error) {
-		throw response(true, null, error.message, error.stack);
+		throw response(true, null, error.message, error.stack,500);
 	}
 };

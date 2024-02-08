@@ -80,11 +80,11 @@ exports.findAll = async (req) => {
       return response(false, null, resMessage.success, {
         result: userList,
         meta,
-      });
+      },200);
     }
-    return response(true, null, resMessage.failed);
+    return response(true, null, resMessage.failed,[],400);
   } catch (error) {
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };
 
@@ -94,11 +94,11 @@ exports.findById = async (req) => {
     let isuser = await makeMongoDbService.getSingleDocumentById(id)
     
     if (!isuser || isuser.status == "D") {
-      return response(true, null, resMessage.failed);
+      return response(true, null, resMessage.failed,[],404);
     }
 
-    return response(false, null, resMessage.success, isuser);
+    return response(false, null, resMessage.success, isuser,200);
   } catch (error) {
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };

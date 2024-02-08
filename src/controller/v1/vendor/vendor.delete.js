@@ -15,7 +15,7 @@ exports.deleteVendor = async (req) => {
     let vendor = await makeMongoDbService.getDocumentById(id);
     
     if (!vendor) {
-      return response(true, resMessage.vendorNotFound, null);
+      return response(true, resMessage.vendorNotFound, null,[],404);
     }
 
     const products = await makeMongoDbServiceProduct.getDocumentByQuery({
@@ -27,11 +27,11 @@ exports.deleteVendor = async (req) => {
     }
     vendor = await makeMongoDbService.softDeleteDocument(id);
     if (vendor) {
-      return response(false, resMessage.vendorDeleted, null);
+      return response(false, resMessage.vendorDeleted, null,[],200);
     } else {
-      return response(true, resMessage.vendorNotDeleted, null);
+      return response(true, resMessage.vendorNotDeleted, null,[],400);
     }
   } catch (error) {
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };

@@ -17,8 +17,8 @@ exports.verifyToken = async (req, res, next) => {
 			!req.headers.authorization.startsWith("Bearer ")
 		)
 			return res
-				.status(200)
-				.json(response(true, resMessage.unAuthorized, null));
+				.status(401)
+				.json(response(true, resMessage.unAuthorized, null,[],401).data);
 
 		const token = req.headers.authorization.split(" ")[1];
 		let decoded = "";
@@ -35,8 +35,8 @@ exports.verifyToken = async (req, res, next) => {
 			);
 		} catch (error) {
 			return res
-				.status(200)
-				.json(response(true, resMessage.unAuthorized, resMessage.invalidToken));
+				.status(401)
+				.json(response(true, resMessage.unAuthorized, resMessage.invalidToken,[],401).data);
 		}
 
 		const user = await makeMongoDbService.getDocumentById(decoded._id);
@@ -50,15 +50,15 @@ exports.verifyToken = async (req, res, next) => {
 			next();
 		} else {
 			return res
-				.status(200)
+				.status(404)
 				.json(
-					response(true, resMessage.userNotFound, resMessage.invalidToken, {})
+					response(true, resMessage.userNotFound, resMessage.invalidToken, {},404).data
 				);
 		}
 	} catch (error) {
 		return res
-			.status(200)
-			.json(response(true, resMessage.failed, error.message, {}));
+			.status(500)
+			.json(response(true, resMessage.failed, error.message, {},500).data);
 	}
 };
 
@@ -76,8 +76,8 @@ exports.isAdmin = async (req, res, next) => {
 				(err, decoded) => {
 					if (err) {
 						return res
-							.status(200)
-							.json(response(true, null, resMessage.invalidToken));
+							.status(401)
+							.json(response(true, null, resMessage.invalidToken,[],401).data);
 					}
 					return decoded;
 				}
@@ -111,8 +111,8 @@ exports.isVendor = async (req, res, next) => {
 				(err, decoded) => {
 					if (err) {
 						return res
-							.status(200)
-							.json(response(true, null, resMessage.invalidToken));
+							.status(401)
+							.json(response(true, null, resMessage.invalidToken,[],401).data);
 					}
 					return decoded;
 				}

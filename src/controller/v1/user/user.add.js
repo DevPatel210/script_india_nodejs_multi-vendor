@@ -18,7 +18,7 @@ exports.create = async (req) => {
 			[]
 		);
 		if (user) {
-			return response(true, resMessage.alreadyExist, "null");
+			return response(true, resMessage.alreadyExist, "null",[],400);
 		}
 		req.body.password = await hashPassword(req.body.password);
 		const userData = req.body;
@@ -39,9 +39,10 @@ exports.create = async (req) => {
 				"country",
 				"pincode",
 				"phone_number",
-			])
+			]),
+			201
 		);
 	} catch (error) {
-		return response(true, null, error.message, error.stack);
+		return response(true, null, error.message, error.stack,500);
 	}
 };

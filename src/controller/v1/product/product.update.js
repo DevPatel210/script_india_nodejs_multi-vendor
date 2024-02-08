@@ -19,7 +19,7 @@ exports.Update = async (req) => {
     }
 
     if (!isProduct) {
-      return response(true, resMessage.notFound, null);
+      return response(true, resMessage.notFound, null,[],404);
     }
     const productData = req.body; // update product payload
     const updatedProduct = await makeMongoDbService.findOneAndUpdateDocument(
@@ -27,9 +27,8 @@ exports.Update = async (req) => {
       productData
     );
 
-    return response(false, resMessage.success, null, updatedProduct);
+    return response(false, resMessage.success, null, updatedProduct,200);
   } catch (error) {
-    console.log(error);
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };

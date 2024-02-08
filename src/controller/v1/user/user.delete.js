@@ -11,16 +11,16 @@ exports.deleteUser = async (req) => {
     let user = await makeMongoDbService.getDocumentById(id);
     
     if (!user) {
-      return response(true, resMessage.userNotFound, null);
+      return response(true, resMessage.userNotFound, null,[],404);
     }
 
     user = await makeMongoDbService.softDeleteDocument(id);
     if (user) {
-      return response(false, resMessage.userDeleted, null);
+      return response(false, resMessage.userDeleted, null,[],200);
     } else {
-      return response(true, resMessage.userNotDeleted, null);
+      return response(true, resMessage.userNotDeleted, null,[],400);
     }
   } catch (error) {
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };

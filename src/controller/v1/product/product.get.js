@@ -129,9 +129,9 @@ exports.findAll = async (req) => {
 		return response(false, null, resMessage.success, {
 			result: productsList,
 			meta 
-		});
+		},200);
 	} catch (error) {
-		return response(true, null, error.message, error.stack);
+		return response(true, null, error.message, error.stack,500);
 	}
 };
 
@@ -148,11 +148,11 @@ exports.findById = async (req) => {
 			);
 		}
 		if (!isProduct || isProduct.status == "D") {
-			return response(true, null, resMessage.notFound);
+			return response(true, null, resMessage.notFound,[],404);
 		}
 		const vendor = await makeMongoDbServiceVendor.getDocumentById(isProduct.vendor);
 		if (!vendor || vendor.status == "D") {
-			return response(true, null, resMessage.vendorNotFound);
+			return response(true, null, resMessage.vendorNotFound,[],404);
 		}
 		isProduct = {
 			...isProduct._doc,
@@ -160,8 +160,8 @@ exports.findById = async (req) => {
 			commission: ((isProduct.price*vendor.commission)/100),
 			finalPrice: isProduct.price + ((isProduct.price*vendor.commission)/100),
 		}
-		return response(false, null, resMessage.success, isProduct);
+		return response(false, null, resMessage.success, isProduct,[],200);
 	} catch (error) {
-		return response(true, null, error.message, error.stack);
+		return response(true, null, error.message, error.stack,500);
 	}
 };

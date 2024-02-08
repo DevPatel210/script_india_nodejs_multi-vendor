@@ -8,14 +8,14 @@ exports.delete = async (req) => {
 	try {
 		let isReview = await makeMongoDbService.getSingleDocumentById(req.body.id);
 		if (!isReview || isReview.status == "D") {
-			return response(true, resMessage.notFound, null);
+			return response(true, resMessage.notFound, null,[],404);
 		}
 		const deletedReview = await makeMongoDbService.softDeleteDocument({
 			_id: req.body.id,
 		});
 
-		return response(false, resMessage.success, null);
+		return response(false, resMessage.success, null,[],200);
 	} catch (error) {
-		return response(true, null, error.message, error.stack);
+		return response(true, null, error.message, error.stack,500);
 	}
 };

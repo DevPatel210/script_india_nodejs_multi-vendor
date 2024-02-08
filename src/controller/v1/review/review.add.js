@@ -9,9 +9,9 @@ exports.add = async (req) => {
 		req.body.user = req.user._id;
 		const review = await makeMongoDbService.createDocument(req.body);
 
-		return response(false, resMessage.success, null, review);
+		return response(false, resMessage.success, null, review,201);
 	} catch (error) {
 		console.log(error);
-		throw response(true, null, error.message, error.stack);
+		throw response(true, null, error.message, error.stack,500);
 	}
 };

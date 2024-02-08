@@ -67,11 +67,11 @@ exports.findAll = async (req) => {
       return response(false, null, resMessage.success, {
         result: vendorList,
         meta,
-      });
+      },200);
     }
-    return response(true, null, resMessage.failed);
+    return response(true, null, resMessage.failed,[],400);
   } catch (error) {
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };
 
@@ -81,11 +81,11 @@ exports.findById = async (req) => {
     let isVendor = await makeMongoDbService.getSingleDocumentById(id)
     
     if (!isVendor|| isVendor.status == "D") {
-      return response(true, null, resMessage.failed);
+      return response(true, null, resMessage.failed,[],404);
     }
 
-    return response(false, null, resMessage.success, isVendor);
+    return response(false, null, resMessage.success, isVendor,200);
   } catch (error) {
-    return response(true, null, error.message, error.stack);
+    return response(true, null, error.message, error.stack,500);
   }
 };
