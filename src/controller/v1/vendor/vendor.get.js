@@ -43,6 +43,7 @@ exports.findAll = async (req) => {
             last_name: 1,
             email: 1,
             status: 1,
+            commission:1,
           },
         },
         { $sort: sortCriteria }, // Add the $sort stage to sort the documents
