@@ -181,7 +181,6 @@ exports.get = async (req) => {
 
 exports.update = async (req) => {
     try {
-    
         let isorder = await makeMongoDbService.getDocumentById(req.body.order_id);
     
         if (!isorder) {
@@ -193,7 +192,7 @@ exports.update = async (req) => {
           orderData
         );
     
-        return response(false, resMessage.userUpdated, null, updatedOrder,200);
+        return response(false, resMessage.orderUpdated, null, updatedOrder,200);
         } catch (error) {
         throw response(true, null, error.message, error.stack,500);
     }
@@ -213,5 +212,35 @@ exports.delete = async (req) => {
         return response(false, "Order Delete Successfully", null, updatedOrder,200);
         } catch (error) {
         throw response(true, null, error.message, error.stack,500);
+    }
+}
+
+exports.addTrackingDetails = async (req) => {
+    try {
+        if(req.isVendor){
+            let isorder = await makeMongoDbService.getDocumentById(req.body.order_id);
+            if (!isorder) {
+                return response(true, resMessage.orderNotFound, null,[],404);
+            }
+            if (!isorder.vendors.map((id)=>id.toString()).includes(req.vendor._id.toString())) {
+                return response(true, null, resMessage.failed,[],403);
+            }
+            
+            const order = isorder;
+            order.trackingDetails = {
+                tracking_number: req.body.tracking_number,
+                tracking_link: req.body.tracking_link,
+                remarks: req.body.remarks
+            }
+            const updatedOrder = await makeMongoDbService.findOneAndUpdateDocument(
+              { _id: req.body.order_id },
+              order
+            );
+        
+            return response(false, resMessage.orderUpdated, null, updatedOrder,200);
+        }
+        return response(true, null, resMessage.failed,[],403);
+    } catch (error) {
+        return response(true, null, error.message, error.stack,500);
     }
 }

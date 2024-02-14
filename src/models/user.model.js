@@ -24,6 +24,9 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  address2: {
+    type: String,
+  },
   city: {
     type: String,
     required: true,

@@ -22,3 +22,7 @@ exports.updateOrder = (req, res) => {
 exports.deleteOrder = (req, res) => {
     handleResponse(getOrder.delete(req), res);
 };
+
+exports.addTrackingDetails = (req, res) => {
+    handleResponse(getOrder.addTrackingDetails(req), res);
+};

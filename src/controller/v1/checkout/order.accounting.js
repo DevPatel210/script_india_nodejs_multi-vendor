@@ -19,9 +19,10 @@ const makeMongoDbServiceProduct = require("../../../services/mongoDbService")({
 });
 
 exports.accounting = async (req) => {
-    try {
-        let cartId = req.body.cartId;
-        let orderAccounting = {};
+	try {
+		let cartId = req.body.cartId;
+		let shippingAddress = req.body.shippingAddress;
+		let orderAccounting = {};
 		let cartAccountingList = [];
 		let vendors = await makeMongoDbServiceVendor.getDocumentByQuery({
 			status: { $ne: 'D'}
@@ -76,9 +77,11 @@ exports.accounting = async (req) => {
 			user_id: req.user._id,
 			cart_id: cartId,
 			vendors: Array.from(vendorset),
+			shippingAddress,
 			accounting: orderAccounting,
 			paymentId: paymentId,
 			payment_status: "I",
+			trackingDetails:{}
 		});
 
 		orderAccounting.cartAccountingList = orderAccounting.cartAccountingList.map((list) => {
@@ -91,6 +94,8 @@ exports.accounting = async (req) => {
 
 		return response(false, resMessage.success, null, {
 			...orderAccounting,
+			shippingAddress,
+			trackingDetails: {},
 			paymentId,
 		},200);
 	} catch (error) {

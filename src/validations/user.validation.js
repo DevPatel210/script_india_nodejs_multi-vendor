@@ -18,6 +18,7 @@ module.exports = {
       .isString()
       .isLength({ min: 8 }),
     body("address", "Invalid address").notEmpty().isString(),
+    body("address2", "Invalid address").optional().isString(),
     body("city", "Invalid address").notEmpty().isString(),
     body("state", "Invalid state").notEmpty().isString(),
     body("country", "Invalid country").notEmpty().isString(),
@@ -49,6 +50,7 @@ module.exports = {
 			.isString()
 			.isLength({ min: 8 }),
 		body("address", "Invalid address").optional().notEmpty().isString(),
+		body("address2", "Invalid address").optional().notEmpty().isString(),
 		body("city", "Invalid address").optional().notEmpty().isString(),
 		body("state", "Invalid state").optional().notEmpty().isString(),
 		body("country", "Invalid country").optional().notEmpty().isString(),

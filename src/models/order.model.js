@@ -31,6 +31,13 @@ const orderSchema = new mongoose.Schema(
 			type: String,
 			required: false
 		},
+		shippingAddress: {
+			type: String,
+			required: true
+		},
+		trackingDetails: {
+			type: Object
+		},
 		payment_status: {
 			type: String,
 			default: "P", // I, C, P
