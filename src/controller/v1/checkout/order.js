@@ -1,6 +1,10 @@
 const { Order } = require("../../../models/order.model");
+const { User } = require("../../../models/user.model");
 const makeMongoDbService = require("../../../services/mongoDbService")({
 	model: Order,
+});
+const makeMongoDbServiceUser = require("../../../services/mongoDbService")({
+	model: User,
 });
 const { Product } = require("../../../models/product.model");
 const { Vendor } = require("../../../models/vendor.model");
@@ -12,6 +16,7 @@ const makeMongoDbServiceVendor = require("../../../services/mongoDbService")({
 });
 const { response, resMessage } = require("../../../helpers/common");
 const { default: mongoose } = require("mongoose");
+const { sendEmail } = require("../../../services/email");
 
 exports.get = async (req) => {
 	try {
@@ -236,6 +241,10 @@ exports.addTrackingDetails = async (req) => {
               { _id: req.body.order_id },
               order
             );
+
+            const user = await makeMongoDbServiceUser.getDocumentById(order.user_id);
+            const message = getAddShippingMessage(order);
+            await sendEmail(user.email,'Order is shipped', message);
         
             return response(false, resMessage.orderUpdated, null, updatedOrder,200);
         }
@@ -243,4 +252,18 @@ exports.addTrackingDetails = async (req) => {
     } catch (error) {
         return response(true, null, error.message, error.stack,500);
     }
+}
+
+function getAddShippingMessage(order){
+	return `
+		Dear customer,<br>
+		Your order is placed for shipping. Please find the shipping details of your order below: 
+        <br>
+		<h4>Order id:</h4> ${order._id.toString()}
+		<h4>Shipping Address:</h4> ${order.shippingAddress}
+		<h4>Final Price:</h4> $ ${order.accounting.finalTotal}
+		<h4>Tracking Number:</h4> ${order.trackingDetails.tracking_number}
+		<h4>Tracking Link:</h4> ${order.trackingDetails.tracking_link}
+		<h4>Remarks:</h4> ${order.trackingDetails.remarks}
+	`
 }

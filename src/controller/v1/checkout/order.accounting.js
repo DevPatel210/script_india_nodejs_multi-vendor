@@ -1,9 +1,11 @@
 const { response, resMessage } = require("../../../helpers/common");
 const { Cart } = require("../../../models/cart.model");
 const { Vendor } = require("../../../models/vendor.model");
+const { User } = require("../../../models/user.model");
 const { createPaymentIntent } = require("../../../services/payment");
 const { Order } = require("../../../models/order.model");
 const { Product } = require("../../../models/product.model");
+const { sendEmail } = require("../../../services/email");
 
 const makeMongoDbServiceCart = require("../../../services/mongoDbService")({
 	model: Cart,
@@ -17,11 +19,13 @@ const makeMongoDbServiceVendor = require("../../../services/mongoDbService")({
 const makeMongoDbServiceProduct = require("../../../services/mongoDbService")({
 	model: Product,
 });
+const makeMongoDbServiceUser = require("../../../services/mongoDbService")({
+	model: User,
+});
 
 exports.accounting = async (req) => {
 	try {
 		let cartId = req.body.cartId;
-		let shippingAddress = req.body.shippingAddress;
 		let orderAccounting = {};
 		let cartAccountingList = [];
 		let vendors = await makeMongoDbServiceVendor.getDocumentByQuery({
@@ -71,7 +75,13 @@ exports.accounting = async (req) => {
 			amountToCharge: orderAccounting.finalTotal,
 		};
 		var paymentCred = await createPaymentIntent(payload);
-        var paymentId = paymentCred.id;
+    var paymentId = paymentCred.id;
+
+		let shippingAddress = req.body.shippingAddress;
+		if (!shippingAddress) {
+			const user = await makeMongoDbServiceUser.getDocumentById(req.user._id);
+			shippingAddress = user.address
+		}
 
 		await makeMongoDbServiceOrder.createDocument({
 			user_id: req.user._id,
@@ -92,7 +102,13 @@ exports.accounting = async (req) => {
 				productDetails: (!productDetails) ? {} : productDetails
 			}
 		})
-
+		const message = getOrderPlacedMessage({...orderAccounting,
+			vendorNames: Array.from(vendorset).map((id)=>`${vendors[id].first_name} ${vendors[id].last_name}`),
+			shippingAddress,
+			trackingDetails: {},
+			paymentId,
+		})
+		await sendEmail(req.user.email,'Order Placed', message);
 		return response(false, resMessage.success, null, {
 			...orderAccounting,
 			vendorNames: Array.from(vendorset).map((id)=>`${vendors[id].first_name} ${vendors[id].last_name}`),
@@ -104,3 +120,31 @@ exports.accounting = async (req) => {
 		throw response(true, null, error.message, error.stack,500);
 	}
 };
+
+function getOrderPlacedMessage(order){
+	const productList = order.cartAccountingList.map((product)=>{
+		return `<li>
+			Title: ${product.productDetails.title} <br>
+			Sub title: ${product.productDetails.subTitle} <br>
+			Author: ${product.productDetails.author} <br>
+			Description: ${product.productDetails.description} <br>
+			Category: ${product.productDetails.category} <br>
+			Unit Price: $ ${product.finalUnitPrice} <br>
+			Quantity: ${product.quantity} <br>
+			Total Price: $ ${product.totalPrice} <br>
+		</li>`
+	});
+
+	return `
+		Dear customer,<br>
+		Your order is placed successfully. Please find the details of your order below: 
+		<br>
+		<h4>Products List:</h4>
+		<ul>
+			${productList.join('')}
+		</ul>
+
+		<h4>Shipping Address:</h4> ${order.shippingAddress}
+		<h4>Final Price:</h4> $ ${order.finalTotal}
+	`
+}
