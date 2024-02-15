@@ -77,6 +77,7 @@ exports.accounting = async (req) => {
 			user_id: req.user._id,
 			cart_id: cartId,
 			vendors: Array.from(vendorset),
+			vendorNames: Array.from(vendorset).map((id)=>`${vendors[id].first_name} ${vendors[id].last_name}`),
 			shippingAddress,
 			accounting: orderAccounting,
 			paymentId: paymentId,
@@ -94,6 +95,7 @@ exports.accounting = async (req) => {
 
 		return response(false, resMessage.success, null, {
 			...orderAccounting,
+			vendorNames: Array.from(vendorset).map((id)=>`${vendors[id].first_name} ${vendors[id].last_name}`),
 			shippingAddress,
 			trackingDetails: {},
 			paymentId,

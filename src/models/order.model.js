@@ -17,6 +17,10 @@ const orderSchema = new mongoose.Schema(
 			ref: "Vendor",
 			required: true,
 		}],
+		vendorNames: [{
+			type: String,
+			required: true,
+		}],
 		accounting: {
 			type: Object,
 			required: true,

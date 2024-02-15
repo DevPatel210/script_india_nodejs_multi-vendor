@@ -35,9 +35,9 @@ exports.get = async (req) => {
         if (searchValue && searchValue.trim() !== "") {
 			matchCondition['$and'].push({
                 $or: [
-                    { user_id: { $regex: searchValue, $options: "i" } },
-                    { cart_id: { $regex: searchValue, $options: "i" } },
+                    { payment_status: { $regex: searchValue, $options: "i" } },
                     { status: { $regex: searchValue, $options: "i" } },
+                    { vendorNames: { $regex: searchValue, $options: "i" } },
                 ],
             });
 		}
