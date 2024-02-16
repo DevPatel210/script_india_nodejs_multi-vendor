@@ -29,29 +29,22 @@ exports.findAll = async (req) => {
 		// });
 		// vendors = vendors.reduce((obj, item) => (obj[item._id] = item, obj) ,{});
 
-		let matchCondition = { };
+		let matchCondition = {
+			$and: [{ status: { $ne: "D" } }]
+		 };
 		if (searchValue && searchValue.trim() !== "") {
-			matchCondition.$and = [
-				{
+			matchCondition.$and.push({
 					$or: [
 						{ name: { $regex: searchValue, $options: "i" } },
 					],
 				},
-				{ status: { $ne: "D" } }
-			];
+			)
 		}
 
 		let categoryList, categoryCount;
 		categoryList =
 			await makeMongoDbService.getDocumentByCustomAggregation([
 				{ $match: matchCondition },
-				{
-					$category: {
-						name: 1,
-						image: 1,
-						status: 1,
-					},
-				},
 				{ $sort: sortCriteria },
 				{ $skip: skip },
 				{ $limit: pageSize },

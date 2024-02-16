@@ -10,7 +10,7 @@ const { verifyToken, isAdmin, isVendor } = require("../middleware/auth.mdl");
 router.post("/add", isAdmin,handleImageFile, validate(rules.addCategory), category.create);
 
 // Retrieve all categories
-router.get("/all", verifyToken, validate(rules.listCategory), category.findAll);
+router.get("/all", validate(rules.listCategory), category.findAll);
 
 // Retrieve a single category with id
 router.get("/", verifyToken, category.findById);
