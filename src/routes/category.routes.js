@@ -16,7 +16,7 @@ router.get("/all", verifyToken, validate(rules.listCategory), category.findAll);
 router.get("/", verifyToken, category.findById);
 
 // Update a category
-router.post("/update", isAdmin, validate(rules.updateCategory), category.update);
+router.post("/update", isAdmin, handleImageFile, validate(rules.updateCategory), category.update);
 
 // Delete a category
 router.post("/delete", isAdmin, category.delete);
