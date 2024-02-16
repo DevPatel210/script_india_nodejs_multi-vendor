@@ -7,7 +7,7 @@ const category = require("../controller/v1/category");
 const { verifyToken, isAdmin, isVendor } = require("../middleware/auth.mdl");
 
 // Create a new category
-router.post("/add", isAdmin,validate(rules.addCategory), handleImageFile, category.create);
+router.post("/add", isAdmin,handleImageFile, validate(rules.addCategory), category.create);
 
 // Retrieve all categories
 router.get("/all", verifyToken, validate(rules.listCategory), category.findAll);

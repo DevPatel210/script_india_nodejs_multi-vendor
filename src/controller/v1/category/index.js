@@ -22,4 +22,4 @@ exports.findById = (req, res) => {
 
 exports.delete = (req, res) => {
 	handleResponse(categoryDelete.delete(req), res);
-  };
+};
