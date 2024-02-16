@@ -13,7 +13,7 @@ router.post("/add", isAdmin,handleImageFile, validate(rules.addCategory), catego
 router.get("/all", validate(rules.listCategory), category.findAll);
 
 // Retrieve a single category with id
-router.get("/", verifyToken, category.findById);
+router.get("/", category.findById);
 
 // Update a category
 router.post("/update", isAdmin, handleImageFile, validate(rules.updateCategory), category.update);

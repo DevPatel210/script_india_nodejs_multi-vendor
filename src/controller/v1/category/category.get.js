@@ -83,8 +83,7 @@ exports.findById = async (req) => {
 		
 		let reviews = await makeMongoDbServiceReview.getDocumentByQueryPopulate({
 			status: { $ne: 'D' }
-		},null,["user"]);
-
+		},null,['user','product']);
 		let matchCondition = { 
 			$and: [
 				{ category: isCategory._id.toString() },
@@ -98,10 +97,14 @@ exports.findById = async (req) => {
 			})
 		}
 
-		const productsList = await makeMongoDbServiceProduct.getDocumentByQuery({
-			$match: matchCondition
-		});
+		let productsList = await makeMongoDbServiceProduct.getDocumentByQuery(matchCondition);
 
+		productsList = productsList.map((product)=>{
+			return {
+				...product._doc,
+				reviews: reviews.filter((review)=> review.product._id.toString()==product._id.toString())
+			}
+		})
 		isCategory = {
 			...isCategory._doc,
 			productsList
