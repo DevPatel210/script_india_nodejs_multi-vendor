@@ -75,7 +75,7 @@ exports.findById = async (req) => {
 	try {
 		let isCategory;
 		isCategory = await makeMongoDbService.getSingleDocumentById(
-			req.query.product_id
+			req.query.category_id
 		);
 		if (!isCategory || isCategory.status == "D") {
 			return response(true, null, resMessage.notFound,[],404);
