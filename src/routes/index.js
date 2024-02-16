@@ -4,6 +4,7 @@ const userRoutes = require("./user.routes");
 const vendorRoutes = require("./vendor.routes");
 const authRoutes = require("./auth.routes");
 const productRoutes = require("./product.routes");
+const categoryRoutes = require("./category.routes");
 const reviewRoutes = require("./review.routes");
 const cartRoutes = require("./cart.routes");
 const orderRoutes = require("./order.routes");
@@ -17,6 +18,8 @@ router.use("/vendor", verifyToken, vendorRoutes);
 router.use("/auth", authRoutes);
 
 router.use("/product", productRoutes);
+
+router.use("/category", categoryRoutes);
 
 router.use("/cart", verifyToken, cartRoutes);
 
