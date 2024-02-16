@@ -43,6 +43,7 @@ exports.get = async (req) => {
                     { payment_status: { $regex: searchValue, $options: "i" } },
                     { status: { $regex: searchValue, $options: "i" } },
                     { vendorNames: { $regex: searchValue, $options: "i" } },
+                    // { vendors: { $regex: searchValue, $options:"i" } },
                 ],
             });
 		}
