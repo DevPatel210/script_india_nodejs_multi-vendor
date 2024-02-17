@@ -64,7 +64,6 @@ exports.verifyToken = async (req, res, next) => {
 
 exports.isAdmin = async (req, res, next) => {
 	try {
-		console.log(req.body);
 		if (
 			req.headers ||
 			req.headers.authorization ||
