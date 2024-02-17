@@ -12,6 +12,10 @@ exports.update = (req, res) => {
   handleResponse(productUpdate.Update(req), res);
 };
 
+exports.approveProduct = (req, res) => {
+  handleResponse(productUpdate.approveProduct(req), res);
+};
+
 exports.findAll = (req, res) => {
   handleResponse(productGet.findAll(req), res);
 };

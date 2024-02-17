@@ -32,3 +32,32 @@ exports.Update = async (req) => {
     return response(true, null, error.message, error.stack,500);
   }
 };
+
+exports.approveProduct = async (req) => {
+  try {
+    if(!req.isAdmin){
+      return response(true, null, resMessage.failed,[],403);
+    }
+    let isProduct = await makeMongoDbService.getSingleDocumentById(
+      req.body.product_id
+    );
+
+    if (!isProduct || isProduct.status=='D') {
+      return response(true, resMessage.notFound, null,[],404);
+    }
+    
+    if (isProduct.status=='A') {
+      return response(true, 'Product already approved', null,[],400);
+    }
+
+    isProduct.status='A';
+    const updatedProduct = await makeMongoDbService.findOneAndUpdateDocument(
+      { _id: req.body.product_id },
+      isProduct
+    );
+
+    return response(false, resMessage.success, null, updatedProduct,200);
+  } catch (error) {
+    return response(true, null, error.message, error.stack,500);
+  }
+}

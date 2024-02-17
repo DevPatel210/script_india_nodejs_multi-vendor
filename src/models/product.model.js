@@ -47,7 +47,7 @@ const productSchema = new mongoose.Schema({
 	status: {
 		type: String,
 		required: true,
-		default: "A",
+		default: "P",
 	},
 	isSoldOut: {
 		type: Boolean,
@@ -55,10 +55,10 @@ const productSchema = new mongoose.Schema({
 		default: false,
 	},
 	vendor: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Vendor',
-        required: true,
-    },
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Vendor',
+		required: true,
+	},
 	extraAttr: [extraAttrSchema],
 });
 

@@ -30,6 +30,10 @@ module.exports = {
     body("extraAttr", "extraAttr can not be empty").optional().notEmpty().isArray()
   ],
 
+  approveProduct: [
+    body('product_id', "product_id can not be empty").notEmpty().isString(),
+  ],
+  
   getProduct: [
     query('product_id', "product_id can not be empty").notEmpty().isString(),
   ],

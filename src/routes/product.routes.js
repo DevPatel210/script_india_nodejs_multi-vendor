@@ -6,7 +6,7 @@ const rules = require("../validations/product.validation");
 const product = require("../controller/v1/product");
 const { handleImageFile } = require("../services/multerService");
 const { isVendorAuth } = require("../middleware/checkVendor.mdl");
-const { verifyToken } = require("../middleware/auth.mdl");
+const { verifyToken, isAdmin } = require("../middleware/auth.mdl");
 
 router.post("/add", verifyToken, isVendorAuth, handleImageFile, validate(rules.addProduct), product.create);
 
@@ -19,6 +19,8 @@ router.get("/", validate(rules.getProduct), product.findById);
 router.get("/vendor", verifyToken, isVendorAuth, validate(rules.getProduct), product.findById);
 
 router.post("/update", verifyToken, isVendorAuth, handleImageFile, validate(rules.updateProduct), product.update);
+
+router.post("/approve", verifyToken, isAdmin, validate(rules.approveProduct), product.approveProduct);
 
 router.post("/delete", verifyToken, isVendorAuth, validate(rules.deleteProduct), product.delete);
 
