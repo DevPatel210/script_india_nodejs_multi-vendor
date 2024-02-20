@@ -8,7 +8,8 @@ module.exports = {
 
 	checkout: [
 		body("cartId", "Enter valid cart id").notEmpty().isString().isMongoId(),
-		body("shippingAddress", "Please provide the shipping address").optional().isString(),
+		body("shippingAddress", "Please provide the shipping address").notEmpty().isString(),
+		body("billingAddress", "Please provide the billing address").notEmpty().isString(),
 	],
 	
 	removeProductFromCart: [

@@ -39,6 +39,10 @@ const orderSchema = new mongoose.Schema(
 			type: String,
 			required: true
 		},
+		billingAddress: {
+			type: String,
+			required: true
+		},
 		trackingDetails: {
 			type: Object
 		},

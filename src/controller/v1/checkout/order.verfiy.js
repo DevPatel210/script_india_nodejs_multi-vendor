@@ -45,6 +45,7 @@ function getPaymentSuccessfulMessage(order){
 		Your payment is completed successfully. Please find the details of your order below: 
 		<h4>Order id:</h4> ${order._id.toString()}
 		<h4>Shipping Address:</h4> ${order.shippingAddress}
+		<h4>Billing Address:</h4> ${order.billingAddress}
 		<h4>Final Price:</h4> $ ${order.accounting.finalTotal}
 	`
 }

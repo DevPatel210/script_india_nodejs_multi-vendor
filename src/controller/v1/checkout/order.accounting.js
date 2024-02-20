@@ -78,9 +78,14 @@ exports.accounting = async (req) => {
     var paymentId = paymentCred.id;
 
 		let shippingAddress = req.body.shippingAddress;
+		let billingAddress = req.body.billingAddress;
 		if (!shippingAddress) {
 			const user = await makeMongoDbServiceUser.getDocumentById(req.user._id);
 			shippingAddress = user.address
+		}
+		if (!billingAddress) {
+			const user = await makeMongoDbServiceUser.getDocumentById(req.user._id);
+			billingAddress = user.address
 		}
 
 		await makeMongoDbServiceOrder.createDocument({
@@ -89,6 +94,7 @@ exports.accounting = async (req) => {
 			vendors: Array.from(vendorset),
 			vendorNames: Array.from(vendorset).map((id)=>`${vendors[id].first_name} ${vendors[id].last_name} ${id}`),
 			shippingAddress,
+			billingAddress,
 			accounting: orderAccounting,
 			paymentId: paymentId,
 			payment_status: "I",
@@ -105,6 +111,7 @@ exports.accounting = async (req) => {
 		const message = getOrderPlacedMessage({...orderAccounting,
 			vendorNames: Array.from(vendorset).map((id)=>`${vendors[id].first_name} ${vendors[id].last_name}`),
 			shippingAddress,
+			billingAddress,
 			trackingDetails: {},
 			paymentId,
 		})
@@ -113,6 +120,7 @@ exports.accounting = async (req) => {
 			...orderAccounting,
 			vendorNames: Array.from(vendorset).map((id)=>`${vendors[id].first_name} ${vendors[id].last_name}`),
 			shippingAddress,
+			billingAddress,
 			trackingDetails: {},
 			paymentId,
 		},200);
@@ -145,6 +153,7 @@ function getOrderPlacedMessage(order){
 		</ul>
 
 		<h4>Shipping Address:</h4> ${order.shippingAddress}
+		<h4>Billing Address:</h4> ${order.billingAddress}
 		<h4>Final Price:</h4> $ ${order.finalTotal}
 	`
 }

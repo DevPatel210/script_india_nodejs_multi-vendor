@@ -262,6 +262,7 @@ function getAddShippingMessage(order){
         <br>
 		<h4>Order id:</h4> ${order._id.toString()}
 		<h4>Shipping Address:</h4> ${order.shippingAddress}
+		<h4>Billing Address:</h4> ${order.billingAddress}
 		<h4>Final Price:</h4> $ ${order.accounting.finalTotal}
 		<h4>Tracking Number:</h4> ${order.trackingDetails.tracking_number}
 		<h4>Tracking Link:</h4> ${order.trackingDetails.tracking_link}
