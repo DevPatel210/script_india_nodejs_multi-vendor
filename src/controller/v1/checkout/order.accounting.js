@@ -87,7 +87,7 @@ exports.accounting = async (req) => {
 			const user = await makeMongoDbServiceUser.getDocumentById(req.user._id);
 			billingAddress = user.address
 		}
-
+		console.log('----------')
 		await makeMongoDbServiceOrder.createDocument({
 			user_id: req.user._id,
 			cart_id: cartId,
@@ -100,7 +100,7 @@ exports.accounting = async (req) => {
 			payment_status: "I",
 			trackingDetails:{}
 		});
-
+		console.log('---------- line 103')
 		orderAccounting.cartAccountingList = orderAccounting.cartAccountingList.map((list) => {
 			const productDetails = products[list.productId.toString()]
 			return {
@@ -115,6 +115,7 @@ exports.accounting = async (req) => {
 			trackingDetails: {},
 			paymentId,
 		})
+		console.log('----------117')
 		await sendEmail(req.user.email,'Order Placed', message);
 		return response(false, resMessage.success, null, {
 			...orderAccounting,
@@ -124,7 +125,9 @@ exports.accounting = async (req) => {
 			trackingDetails: {},
 			paymentId,
 		},200);
+		console.log('----------127')
 	} catch (error) {
+		console.log(error)
 		throw response(true, null, error.message, error.stack,500);
 	}
 };
