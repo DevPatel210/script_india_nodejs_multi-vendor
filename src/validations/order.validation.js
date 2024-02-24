@@ -21,5 +21,7 @@ module.exports = {
 		body("tracking_number", "Enter valid tracking number").notEmpty().isString(),
 		body("tracking_link", "Enter valid tracking link").notEmpty().isString(),
 		body("remarks", "Please enter remarks").notEmpty().isString(),
+		body("carrier", "Please enter carrier").notEmpty().isString(),
+		body("delivery_date", "Please enter delivery date").notEmpty().isString(),
 	]
 };

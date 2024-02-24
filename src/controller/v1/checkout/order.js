@@ -236,7 +236,9 @@ exports.addTrackingDetails = async (req) => {
             order.trackingDetails = {
                 tracking_number: req.body.tracking_number,
                 tracking_link: req.body.tracking_link,
-                remarks: req.body.remarks
+                remarks: req.body.remarks,
+                carrier: req.body.carrier,
+                delivery_date: req.body.delivery_date
             }
             const updatedOrder = await makeMongoDbService.findOneAndUpdateDocument(
               { _id: req.body.order_id },
@@ -267,5 +269,7 @@ function getAddShippingMessage(order){
 		<h4>Tracking Number:</h4> ${order.trackingDetails.tracking_number}
 		<h4>Tracking Link:</h4> ${order.trackingDetails.tracking_link}
 		<h4>Remarks:</h4> ${order.trackingDetails.remarks}
+		<h4>Tracking carrier:</h4> ${order.trackingDetails.carrier}
+		<h4>Delivery Date:</h4> ${order.trackingDetails.delivery_date}
 	`
 }
