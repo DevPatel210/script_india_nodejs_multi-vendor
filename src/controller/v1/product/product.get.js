@@ -2,7 +2,7 @@ const { response, resMessage } = require("../../../helpers/common");
 const { Product } = require("../../../models/product.model");
 const { Order } = require("../../../models/order.model");
 const { Vendor } = require("../../../models/vendor.model");
-const { Category } = require("../../../models/category.model");
+// const { Category } = require("../../../models/category.model");
 const Review = require("../../../models/review.model");
 const makeMongoDbService = require("../../../services/mongoDbService")({
 	model: Product,
@@ -17,9 +17,9 @@ const makeMongoDbServiceReview = require("../../../services/mongoDbService")({
 	model: Review,
 });
 
-const makeMongoDbServiceCategory = require("../../../services/mongoDbService")({
-	model: Category,
-});
+// const makeMongoDbServiceCategory = require("../../../services/mongoDbService")({
+// 	model: Category,
+// });
 
 // Retrieve and return all products from the database.
 exports.findAll = async (req) => {
@@ -157,14 +157,13 @@ exports.findAll = async (req) => {
 				status: { $ne: 'D' }
 			},null,["user"]);
 			
-			let category = await makeMongoDbServiceCategory.getDocumentById({
-				_id: product.category
-			})
+			// let category = await makeMongoDbServiceCategory.getDocumentById({
+			// 	_id: product.category
+			// })
 
 			return {
 				...product,
-				category,
-				canAddReview: reviewedProducts.includes(product._id.toString()),
+				// category,
 				reviews,
 				vendorDetails: (!vendor || vendor.status == "D") ? {} : {email: vendor.email, first_name: vendor.first_name, last_name: vendor.last_name, commission: vendor.commission},
 				commission: ((product.price*vendor.commission)/100),
