@@ -1,5 +1,6 @@
 const { response, resMessage } = require("../../../helpers/common");
 const { Product } = require("../../../models/product.model");
+const { Order } = require("../../../models/order.model");
 const { Vendor } = require("../../../models/vendor.model");
 const { Category } = require("../../../models/category.model");
 const Review = require("../../../models/review.model");
@@ -8,6 +9,9 @@ const makeMongoDbService = require("../../../services/mongoDbService")({
 });
 const makeMongoDbServiceVendor = require("../../../services/mongoDbService")({
 	model: Vendor,
+});
+const makeMongoDbServiceOrder = require("../../../services/mongoDbService")({
+	model: Order,
 });
 const makeMongoDbServiceReview = require("../../../services/mongoDbService")({
 	model: Review,
@@ -27,7 +31,18 @@ exports.findAll = async (req) => {
 		}
 		const pageSize = 10;
 		const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
-		const sortCriteria = { _id: -1 };
+		let sortCriteria = { _id: -1 };
+		if(req.query && req.query.sort) {
+			if (req.query.sort=='atoz') {
+				sortCriteria = { title: 1};
+			} else if (req.query.sort=='ztoa') {
+				sortCriteria = {title: -1};
+			} else if (req.query.sort=='priceLow') {
+				sortCriteria = {price: 1};
+			} else if (req.query.sort='priceHigh') {
+				sortCriteria = {price: -1};
+			}
+		}
 		const searchValue = req.query.search;
 		let vendors = await makeMongoDbServiceVendor.getDocumentByQuery({
 			status: { $ne: 'D'}
@@ -112,6 +127,26 @@ exports.findAll = async (req) => {
 			productCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
 		}
 
+		let reviewedProducts = [];
+		if(req.query && req.query.userId){
+			const productsSet = new Set();
+			let matchConditionOrder = { 
+				$and: [
+					{ status: { $ne: 'D' } },
+					{ user_id: req.query.userId }
+				]
+			};
+
+			const orders = await makeMongoDbServiceOrder.getDocumentByQuery(matchConditionOrder); 
+
+			for (let order of orders) {
+				for (let product of order.accounting.cartAccountingList) {
+					productsSet.add(product.productId.toString());
+				}
+			}
+
+			reviewedProducts = Array.from(productsSet);
+		}
 		productsList = await Promise.all(productsList.map(async (product) => {
 			let vendor = vendors[product.vendor];
 			if (!vendor || vendor.status == "D") {
@@ -129,6 +164,7 @@ exports.findAll = async (req) => {
 			return {
 				...product,
 				category,
+				canAddReview: reviewedProducts.includes(product._id.toString()),
 				reviews,
 				vendorDetails: (!vendor || vendor.status == "D") ? {} : {email: vendor.email, first_name: vendor.first_name, last_name: vendor.last_name, commission: vendor.commission},
 				commission: ((product.price*vendor.commission)/100),
@@ -175,6 +211,26 @@ exports.findById = async (req) => {
 			return response(true, null, resMessage.vendorNotFound,[],404);
 		}
 		
+		let reviewedProducts = [];
+		if(req.query && req.query.userId){
+			const productsSet = new Set();
+			let matchConditionOrder = { 
+				$and: [
+					{ status: { $ne: 'D' } },
+					{ user_id: req.query.userId }
+				]
+			};
+
+			const orders = await makeMongoDbServiceOrder.getDocumentByQuery(matchConditionOrder); 
+
+			for (let order of orders) {
+				for (let product of order.accounting.cartAccountingList) {
+					productsSet.add(product.productId.toString());
+				}
+			}
+
+			reviewedProducts = Array.from(productsSet);
+		}
 		let reviews = await makeMongoDbServiceReview.getDocumentByQueryPopulate({
 			product: isProduct._id.toString(),
 			status: { $ne: 'D' }
@@ -183,6 +239,7 @@ exports.findById = async (req) => {
 		isProduct = {
 			...isProduct._doc,
 			reviews,
+			canAddReview: reviewedProducts.includes(isProduct._id.toString()),
 			vendorDetails: {email: vendor.email, first_name: vendor.first_name, last_name: vendor.last_name, commission: vendor.commission},
 			commission: ((isProduct.price*vendor.commission)/100),
 			finalPrice: isProduct.price + ((isProduct.price*vendor.commission)/100),

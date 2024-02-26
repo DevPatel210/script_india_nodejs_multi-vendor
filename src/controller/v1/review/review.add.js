@@ -17,9 +17,7 @@ exports.add = async (req) => {
 				{ user_id: req.user._id }
 			]
     };
-		const orders = await makeMongoDbServiceOrder.getDocumentByCustomAggregation([{
-			$match: matchCondition
-		}]);
+		const orders = await makeMongoDbServiceOrder.getDocumentByQuery(matchCondition);
 		
 		const isProductOrdered = orders.find((order)=> {
 			for (let product of order.accounting.cartAccountingList) {

@@ -73,6 +73,10 @@ exports.findAll = async (req) => {
 
 exports.findById = async (req) => {
 	try {
+		const pageNumber = parseInt(req.query.pageNumber);
+		if (isNaN(pageNumber) || pageNumber < 1) {
+			throw new Error('Invalid pageNumber');
+		}
 		let isCategory;
 		isCategory = await makeMongoDbService.getSingleDocumentById(
 			req.query.category_id
@@ -84,6 +88,7 @@ exports.findById = async (req) => {
 		let reviews = await makeMongoDbServiceReview.getDocumentByQueryPopulate({
 			status: { $ne: 'D' }
 		},null,['user','product']);
+
 		let matchCondition = { 
 			$and: [
 				{ category: isCategory._id.toString() },
@@ -97,12 +102,46 @@ exports.findById = async (req) => {
 			})
 		}
 
-		let productsList = await makeMongoDbServiceProduct.getDocumentByQuery(matchCondition);
+		const pageSize = 10;
+		const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
+		let sortCriteria = { _id: -1 };
+		if(req.query && req.query.sort) {
+			if (req.query.sort=='atoz') {
+				sortCriteria = { title: 1};
+			} else if (req.query.sort=='ztoa') {
+				sortCriteria = {title: -1};
+			} else if (req.query.sort=='priceLow') {
+				sortCriteria = {price: 1};
+			} else if (req.query.sort='priceHigh') {
+				sortCriteria = {price: -1};
+			}
+		}
+		const searchValue = req.query.search;
+		if (searchValue && searchValue.trim() !== "") {
+			matchCondition.$and.push({
+				$or: [
+					{ title: { $regex: searchValue, $options: "i" } },
+					{ sub_title: { $regex: searchValue, $options: "i" } },
+					{ author: { $regex: searchValue, $options: "i" } },
+					{ description: { $regex: searchValue, $options: "i" } },
+					{ category: { $regex: searchValue, $options: "i" } },
+				],
+			});
+		}
+
+		let productsList = await makeMongoDbServiceProduct.getDocumentByCustomAggregation([
+			{ $match: matchCondition },
+			{ $sort: sortCriteria },
+			{ $skip: skip },
+			{ $limit: pageSize },
+		]);
+
+		console.log({productsList});
 
 		productsList = productsList.map((product)=>{
 			return {
-				...product._doc,
-				reviews: reviews.filter((review)=> review.product._id.toString()==product._id.toString())
+				...product,
+				reviews: reviews.filter((review)=> review.product && review.product._id.toString()==product._id.toString())
 			}
 		})
 		isCategory = {
@@ -111,6 +150,7 @@ exports.findById = async (req) => {
 		}
 		return response(false, null, resMessage.success, isCategory,200);
 	} catch (error) {
+		console.log(error);
 		return response(true, null, error.message, error.stack,500);
 	}
 };
