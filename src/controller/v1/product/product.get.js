@@ -162,6 +162,7 @@ exports.findAll = async (req) => {
 			return {
 				...product,
 				category,
+				canAddReview: reviewedProducts.includes(product._id.toString()),
 				reviews,
 				vendorDetails: (!vendor || vendor.status == "D") ? {} : {email: vendor.email, first_name: vendor.first_name, last_name: vendor.last_name, commission: vendor.commission},
 				commission: ((product.price*vendor.commission)/100),
