@@ -4,6 +4,7 @@ const { Vendor } = require("../../../models/vendor.model");
 const { User } = require("../../../models/user.model");
 const { createPaymentIntent } = require("../../../services/payment");
 const { Order } = require("../../../models/order.model");
+const { Category } = require("../../../models/category.model");
 const { Product } = require("../../../models/product.model");
 const { sendEmail } = require("../../../services/email");
 
@@ -12,6 +13,9 @@ const makeMongoDbServiceCart = require("../../../services/mongoDbService")({
 });
 const makeMongoDbServiceOrder = require("../../../services/mongoDbService")({
 	model: Order,
+});
+const makeMongoDbServiceCategory = require("../../../services/mongoDbService")({
+	model: Category,
 });
 const makeMongoDbServiceVendor = require("../../../services/mongoDbService")({
 	model: Vendor,
@@ -36,6 +40,10 @@ exports.accounting = async (req) => {
 			status: { $ne: 'D'}
 		});
 		products = products.reduce((obj, item) => (obj[item._id] = item, obj) ,{});
+		let category = await makeMongoDbServiceCategory.getDocumentByQuery({
+			status: { $ne: 'D'}
+		});
+		category = category.reduce((obj, item) => (obj[item._id] = item, obj) ,{});
 		let cartData = await makeMongoDbServiceCart.getSingleDocumentByIdPopulate(
 			cartId,
 			null,
@@ -55,6 +63,7 @@ exports.accounting = async (req) => {
 			if(!vendor || !vendor.commission){
 				vendor = {commission: 0};
 			}
+			cartAccountingItem["category"] = category[newProduct.category.toString()].name;
 			cartAccountingItem["unitCommission"] = (cartAccountingItem["unitPrice"]*vendor.commission)/100;
 			cartAccountingItem["finalUnitPrice"] = cartAccountingItem["unitPrice"]+cartAccountingItem["unitCommission"];
 			cartAccountingItem["quantity"] = productListitem.quantity;
@@ -87,7 +96,6 @@ exports.accounting = async (req) => {
 			const user = await makeMongoDbServiceUser.getDocumentById(req.user._id);
 			billingAddress = user.address
 		}
-		console.log('----------')
 		await makeMongoDbServiceOrder.createDocument({
 			user_id: req.user._id,
 			cart_id: cartId,
@@ -100,7 +108,6 @@ exports.accounting = async (req) => {
 			payment_status: "I",
 			trackingDetails:{}
 		});
-		console.log('---------- line 103')
 		orderAccounting.cartAccountingList = orderAccounting.cartAccountingList.map((list) => {
 			const productDetails = products[list.productId.toString()]
 			return {
@@ -115,7 +122,6 @@ exports.accounting = async (req) => {
 			trackingDetails: {},
 			paymentId,
 		})
-		console.log('----------117')
 		await sendEmail(req.user.email,'Order Placed', message);
 		return response(false, resMessage.success, null, {
 			...orderAccounting,
@@ -125,7 +131,6 @@ exports.accounting = async (req) => {
 			trackingDetails: {},
 			paymentId,
 		},200);
-		console.log('----------127')
 	} catch (error) {
 		console.log(error)
 		throw response(true, null, error.message, error.stack,500);
@@ -136,10 +141,7 @@ function getOrderPlacedMessage(order){
 	const productList = order.cartAccountingList.map((product)=>{
 		return `<li>
 			Title: ${product.productDetails.title} <br>
-			Sub title: ${product.productDetails.subTitle} <br>
-			Author: ${product.productDetails.author} <br>
-			Description: ${product.productDetails.description} <br>
-			Category: ${product.productDetails.category} <br>
+			Category: ${product.category} <br>
 			Unit Price: $ ${product.finalUnitPrice} <br>
 			Quantity: ${product.quantity} <br>
 			Total Price: $ ${product.totalPrice} <br>
