@@ -83,8 +83,8 @@ exports.accounting = async (req) => {
 			cart_id: cartId,
 			amountToCharge: orderAccounting.finalTotal,
 		};
-		var paymentCred = await createPaymentIntent(payload);
-    var paymentId = paymentCred.id;
+		// var paymentCred = await createPaymentIntent(payload);
+    // var paymentId = paymentCred.id;
 
 		let shippingAddress = req.body.shippingAddress;
 		let billingAddress = req.body.billingAddress;
@@ -96,7 +96,7 @@ exports.accounting = async (req) => {
 			const user = await makeMongoDbServiceUser.getDocumentById(req.user._id);
 			billingAddress = user.address
 		}
-		await makeMongoDbServiceOrder.createDocument({
+		const responseData = await makeMongoDbServiceOrder.createDocument({
 			user_id: req.user._id,
 			cart_id: cartId,
 			vendors: Array.from(vendorset),
@@ -104,7 +104,7 @@ exports.accounting = async (req) => {
 			shippingAddress,
 			billingAddress,
 			accounting: orderAccounting,
-			paymentId: paymentId,
+			// paymentId: paymentId,
 			payment_status: "I",
 			trackingDetails:{}
 		});
@@ -120,16 +120,18 @@ exports.accounting = async (req) => {
 			shippingAddress,
 			billingAddress,
 			trackingDetails: {},
-			paymentId,
+			// paymentId,
 		})
 		await sendEmail(req.user.email,'Order Placed', message);
 		return response(false, resMessage.success, null, {
 			...orderAccounting,
+			order_id: responseData._id.toString(),
 			vendorNames: Array.from(vendorset).map((id)=>`${vendors[id].first_name} ${vendors[id].last_name}`),
 			shippingAddress,
 			billingAddress,
 			trackingDetails: {},
-			paymentId,
+			// paymentId,
+			stripeSecret: process.env.STRIPE_SECRET
 		},200);
 	} catch (error) {
 		console.log(error)
