@@ -17,11 +17,12 @@ exports.verifyOrder = async (req) => {
 	try {
 		let order;
 		let paymentId = req.body.paymentId;
+		let order_id = req.body.order_id;
 		let paymentIntent = await verifyPayment(paymentId);
 		if (paymentIntent.status === "succeeded") {
 			order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
-				{ paymentId },
-				{ payment_status : "C"}
+				{ _id: order_id },
+				{ payment_status : "C", paymentIntent }
 			);
 			const user = await makeMongoDbServiceUser.getDocumentById(order.user_id);
 			const message = getPaymentSuccessfulMessage(order);
@@ -29,7 +30,7 @@ exports.verifyOrder = async (req) => {
 			return response(false, "Payment received successfully.", null, order,200);
 		} else {
 			order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
-				{ paymentId },
+				{ _id: order_id },
 				{ payment_status: "P" }
 			);
 			return response(true, "Order payment is incomplete.", null, order,400);

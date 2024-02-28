@@ -18,5 +18,6 @@ module.exports = {
 
 	verifyOrder: [
 		body("paymentId", "Enter valid payment id").notEmpty().isString(),
+		body("order_id", "Enter valid order id").notEmpty().isString(),
 	]
 };
