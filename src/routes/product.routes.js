@@ -22,6 +22,8 @@ router.post("/update", verifyToken, isVendorAuth, handleImageFile, validate(rule
 
 router.post("/approve", verifyToken, isAdmin, validate(rules.approveProduct), product.approveProduct);
 
+router.post("/unApprove", verifyToken, isAdmin, validate(rules.approveProduct), product.unApproveProduct);
+
 router.post("/delete", verifyToken, isVendorAuth, validate(rules.deleteProduct), product.delete);
 
 module.exports = router;

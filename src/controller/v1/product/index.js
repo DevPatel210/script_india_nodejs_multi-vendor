@@ -16,6 +16,10 @@ exports.approveProduct = (req, res) => {
   handleResponse(productUpdate.approveProduct(req), res);
 };
 
+exports.unApproveProduct = (req, res) => {
+  handleResponse(productUpdate.unApproveProduct(req), res);
+};
+
 exports.findAll = (req, res) => {
   handleResponse(productGet.findAll(req), res);
 };
