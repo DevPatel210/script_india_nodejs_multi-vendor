@@ -233,6 +233,7 @@ exports.addTrackingDetails = async (req) => {
             }
             
             const order = isorder;
+            order.status = 'S';
             order.trackingDetails = {
                 tracking_number: req.body.tracking_number,
                 tracking_link: req.body.tracking_link,
