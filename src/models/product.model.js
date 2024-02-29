@@ -58,6 +58,22 @@ const productSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	origins:{
+		type: String,
+		required: true,
+	},
+	missions:{
+		type: String,
+		required: true,
+	},
+	roast:{
+		type: String,
+		required: true,
+	},
+	bean:{
+		type: String,
+		required: true,
+	},
 	vendor: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'Vendor',
