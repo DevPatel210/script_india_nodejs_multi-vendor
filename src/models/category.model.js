@@ -11,6 +11,10 @@ const categorySchema = mongoose.Schema({
     type: Array,
     required: true
   },
+  description: {
+    type: string,
+    required: true
+  },
   status: {
     type: String,
     default: "A",
