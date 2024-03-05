@@ -12,6 +12,7 @@ exports.Update = async (req) => {
       isProduct = await makeMongoDbService.getSingleDocumentByQuery({ 
 				vendor: req.vendor._id, _id: req.body.product_id
 			});
+      req.body.status = 'P'
     }else{
       isProduct = await makeMongoDbService.getSingleDocumentById(
         req.body.product_id
