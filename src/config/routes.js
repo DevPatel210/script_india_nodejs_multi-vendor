@@ -4,7 +4,7 @@ module.exports = (app) => {
   // define a root/default route
   app.get("/", (req, res) => {
     res.json({
-      message: "These are MateMegic APIs",
+      message: "Coffee House",
       api_health: "good",
       api_version: "V1.0.0",
     });

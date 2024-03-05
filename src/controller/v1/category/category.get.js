@@ -73,6 +73,7 @@ exports.findAll = async (req) => {
 
 exports.findById = async (req) => {
 	try {
+		let meta = {};
 		const pageNumber = parseInt(req.query.pageNumber);
 		if (isNaN(pageNumber) || pageNumber < 1) {
 			throw new Error('Invalid pageNumber');
@@ -144,11 +145,27 @@ exports.findById = async (req) => {
 				reviews: reviews.filter((review)=> review.product && review.product._id.toString()==product._id.toString())
 			}
 		})
+		productCount = await makeMongoDbServiceProduct.getCountDocumentByQuery(matchCondition);
+		// isCategory = {
+		// 	...isCategory._doc,
+		// 	productsList
+		// }
+		meta = {
+			pageNumber,
+			pageSize,
+			totalCount: productCount,
+			prevPage: parseInt(pageNumber) === 1 ? false : true,
+			nextPage:
+				parseInt(productCount) / parseInt(pageSize) <= parseInt(pageNumber)
+				? false
+				: true,
+			totalPages: Math.ceil(parseInt(productCount) / parseInt(pageSize)),
+		};
 		isCategory = {
 			...isCategory._doc,
-			productsList
+			productsList,meta
 		}
-		return response(false, null, resMessage.success, isCategory,200);
+		return response(false, null, resMessage.success, isCategory,200,meta);
 	} catch (error) {
 		console.log(error);
 		return response(true, null, error.message, error.stack,500);
