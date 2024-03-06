@@ -64,6 +64,18 @@ exports.findAll = async (req) => {
 			];
 		}
 
+		if (req.query.filterBy=='A' || req.query.filterBy=='P') {
+			if (!matchCondition.$and) {
+				matchCondition.$and = [{
+					status: req.query.filterBy
+				}]
+			} else {
+				matchCondition.$and.push({
+					status: req.query.filterBy
+				});
+			}
+		}
+
 		let productsList, productCount;
 		if(req.isVendor){
 			if(!matchCondition.$and){
