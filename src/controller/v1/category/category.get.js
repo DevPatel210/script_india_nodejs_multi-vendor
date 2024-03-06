@@ -130,6 +130,18 @@ exports.findById = async (req) => {
 			});
 		}
 
+		if (req.query.filterBy && req.query.filterBy=='A' || req.query.filterBy=='P') {
+			if (!matchCondition.$and) {
+				matchCondition.$and = [{
+					status: req.query.filterBy
+				}]
+			} else {
+				matchCondition.$and.push({
+					status: req.query.filterBy
+				});
+			}
+		}
+
 		let productsList = await makeMongoDbServiceProduct.getDocumentByCustomAggregation([
 			{ $match: matchCondition },
 			{ $sort: sortCriteria },
