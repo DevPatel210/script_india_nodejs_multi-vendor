@@ -9,6 +9,8 @@ const { isVendor, verifyToken } = require("../middleware/auth.mdl");
 
 router.get("/", validate(rules.getOrder), order.getOrder);
 
+router.get("/getByDate", validate(rules.getOrdersByDate), order.getOrdersByDate);
+
 router.post("/update", validate(rules.updateOrder), order.updateOrder);
 
 router.post("/addTrackingDetails", verifyToken, isVendor, validate(rules.addTrackingDetails), order.addTrackingDetails);

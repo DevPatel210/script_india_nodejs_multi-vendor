@@ -185,6 +185,76 @@ exports.get = async (req) => {
 	}
 };
 
+exports.getByDate = async (req) => {
+	try {
+        let meta = {};
+        const startDateParts = req.query.startDate.split("-");
+        const startDate = new Date(startDateParts[2], startDateParts[1] - 1, startDateParts[0], 18, 30, 0, 0);
+
+        const endDateParts = req.query.endDate.split("-");
+        const endDate = new Date(endDateParts[2], endDateParts[1] - 1, endDateParts[0], 18, 30, 0, 0);
+
+        let orderCount = 0;
+        let result = [];
+        let matchCondition = { 
+            $and: [
+                { 
+                    status: 'C'
+                },
+                { 
+                    createdAt: {
+					    $gte: startDate,
+					    $lte: endDate
+				    }  
+                }
+            ]
+        };
+
+        let products = await makeMongoDbServiceProduct.getDocumentByQuery({
+			status: { $ne: 'D'}
+		});
+		products = products.reduce((obj, item) => (obj[item._id] = item, obj) ,{});
+
+        let vendors = await makeMongoDbServiceVendor.getDocumentByQuery({
+			status: { $ne: 'D'}
+		});
+		vendors = vendors.reduce((obj, item) => (obj[item._id] = item, obj) ,{});
+
+		// if(req.user && req.user.isAdmin === true){
+            result = await makeMongoDbService.getDocumentByCustomAggregation([
+                { $match: matchCondition},
+            ]);
+            orderCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
+
+            meta = {
+                totalCount: orderCount,
+            };
+        // }
+
+        result = result.map((order) => {
+            const filteredOrder = {...order};
+            filteredOrder.accounting.cartAccountingList = order.accounting.cartAccountingList.map((product)=>{
+                // console.log(product);
+                const productDetails = products[product.productId.toString()]
+                const vendorDetails = vendors[product.vendorId.toString()]
+                return {
+                    ...product,
+                    productDetails: (!productDetails) ? {} : productDetails,
+                    vendorDetails: (!vendorDetails) ? {} : vendorDetails
+                }
+            });
+            return filteredOrder     
+        })
+        
+        return response(false, null, resMessage.success, {
+            meta,
+            result,
+        },200);
+	} catch (error) {
+        throw response(true, null, error.message, error.stack,500);
+	}
+};
+
 exports.update = async (req) => {
     try {
         let isorder = await makeMongoDbService.getDocumentById(req.body.order_id);

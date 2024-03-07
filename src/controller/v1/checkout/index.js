@@ -15,6 +15,10 @@ exports.getOrder = (req, res) => {
     handleResponse(getOrder.get(req), res);
 };
 
+exports.getOrdersByDate = (req, res) => {
+    handleResponse(getOrder.getByDate(req), res);
+};
+
 exports.updateOrder = (req, res) => {
     handleResponse(getOrder.update(req), res);
 };
