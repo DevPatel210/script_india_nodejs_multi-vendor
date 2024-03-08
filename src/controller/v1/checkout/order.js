@@ -233,6 +233,11 @@ exports.getByDate = async (req) => {
 
         result = result.map((order) => {
             const filteredOrder = {...order};
+            filteredOrder.vendorNames = filteredOrder.vendorNames ? (filteredOrder.vendorNames.map((name)=> {
+                let arr = name.split(' ');
+                arr = arr.slice(0,arr.length-1);
+                return arr.join(' ');
+            })) : [];
             filteredOrder.accounting.cartAccountingList = order.accounting.cartAccountingList.map((product)=>{
                 // console.log(product);
                 const productDetails = products[product.productId.toString()]
@@ -243,6 +248,7 @@ exports.getByDate = async (req) => {
                     vendorDetails: (!vendorDetails) ? {} : vendorDetails
                 }
             });
+            console.log(filteredOrder);
             return filteredOrder     
         })
         
@@ -251,6 +257,7 @@ exports.getByDate = async (req) => {
             result,
         },200);
 	} catch (error) {
+        console.log(error);
         throw response(true, null, error.message, error.stack,500);
 	}
 };
