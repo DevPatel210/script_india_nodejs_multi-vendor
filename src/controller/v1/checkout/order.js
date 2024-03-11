@@ -110,7 +110,13 @@ exports.get = async (req) => {
                 for(let product of filteredProducts){
                     totalPrice += product.totalPrice;
                 }
+
                 filteredOrder.accounting.cartAccountingList = filteredProducts;
+                filteredOrder.vendorNames = filteredOrder.vendorNames ? (filteredOrder.vendorNames.map((name)=> {
+                    let arr = name.split(' ');
+                    arr = arr.slice(0,arr.length-1);
+                    return arr.join(' ');
+                })) : [];
                 filteredOrder.accounting.finalTotal = totalPrice;
                 return filteredOrder     
             })
