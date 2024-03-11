@@ -20,6 +20,9 @@ exports.Update = async (req) => {
       return response(true, resMessage.notFound, null,[],404);
     }
     const categoryData = req.body; // update category payload
+    if(typeof categoryData.image == 'string'){
+      delete categoryData.image;
+    }
     const updatedCategory = await makeMongoDbService.findOneAndUpdateDocument(
       { _id: req.body.category_id },
       categoryData

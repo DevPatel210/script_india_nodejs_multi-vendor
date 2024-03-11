@@ -3,7 +3,7 @@ module.exports = {
   loginFailed: "Login failed",
   invalidPassword: "Password is incorrect",
   userNotFound: "User not found",
-  vendorNotFound: "Venfor not found",
+  vendorNotFound: "Vendor not found",
   failed: "Your request is not executed.",
   success: "Your request is executed successfully.",
   userDeleted: "user deleted successfully.",

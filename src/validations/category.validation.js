@@ -1,5 +1,12 @@
 const { body, check, query } = require("express-validator");
 
+const customValidator = (value) => {
+  if (typeof value === 'string' || Array.isArray(value)) {
+    return true;
+  }
+  return false;
+};
+
 module.exports = {
             
   addCategory: [
@@ -10,7 +17,7 @@ module.exports = {
   updateCategory: [
     body("category_id", "category_id can not be empty").notEmpty().isString(),
     body("name", "name can not be empty").optional().notEmpty().isString(),
-    body("image", "image can not be empty").optional().notEmpty().isArray(),
+    body("image", "image can not be empty").optional().notEmpty().custom(customValidator),
     body("status", "status can not be empty").optional().notEmpty().isString(),
   ],
 

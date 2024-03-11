@@ -251,6 +251,9 @@ exports.findById = async (req) => {
 
 			reviewedProducts = Array.from(productsSet);
 		}
+
+		let category = await makeMongoDbServiceCategory.getDocumentById(isProduct.category)
+
 		let reviews = await makeMongoDbServiceReview.getDocumentByQueryPopulate({
 			product: isProduct._id.toString(),
 			status: { $ne: 'D' }
@@ -259,6 +262,7 @@ exports.findById = async (req) => {
 		isProduct = {
 			...isProduct._doc,
 			reviews,
+			category: category ? category: isProduct.category,
 			canAddReview: reviewedProducts.includes(isProduct._id.toString()),
 			vendorDetails: {email: vendor.email, first_name: vendor.first_name, last_name: vendor.last_name, commission: vendor.commission},
 			commission: ((isProduct.price*vendor.commission)/100),
