@@ -21,4 +21,7 @@ router.post("/update", isVendor, validate(rules.updateVendor), vendor.update);
 // Delete a vendor
 router.post("/delete", isAdmin, vendor.deleteVendor);
 
+router.post("/updatePassword/:vendorId", isVendor, validate(rules.updatePassword), vendor.updatePassword);
+
+
 module.exports = router;

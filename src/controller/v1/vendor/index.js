@@ -2,6 +2,7 @@ const vendorGet = require("./vendor.get");
 const vendorCreate = require("./vendor.add");
 const vendorUpdate = require("./vendor.update");
 const vendorDelete = require("./vendor.delete");
+const vendorUpdatePassword = require("./vendor.updatePassword");
 const { handleResponse } = require("../../../helpers/common");
 
 exports.create = (req, res) => {
@@ -23,3 +24,8 @@ exports.update = (req, res) => {
 exports.deleteVendor = (req, res) => {
 	handleResponse(vendorDelete.deleteVendor(req), res);
 };
+
+exports.updatePassword = (req, res) => {
+	handleResponse(vendorUpdatePassword.updatePassword(req), res);
+};
+// index.js

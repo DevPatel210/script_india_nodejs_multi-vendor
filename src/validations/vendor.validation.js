@@ -65,4 +65,21 @@ module.exports = {
 					});
 			}),
 	],
+	updatePassword: [
+		body("oldPassword", "Invalid old password")
+			.notEmpty()
+			.isString(),
+		body("newPassword", "Invalid new password, password should be at least 8 characters long")
+			.notEmpty()
+			.isString()
+			.isLength({ min: 8 }),
+		body("confirmPassword", "Confirm password does not match new password")
+			.notEmpty()
+			.isString()
+			.custom((value, { req }) => {
+				return value === req.body.newPassword;
+			}),
+	],
+	
+	
 };
