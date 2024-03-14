@@ -23,3 +23,11 @@ exports.update = (req, res) => {
 exports.deleteUser = (req, res) => {
 	handleResponse(userDelete.deleteUser(req), res);
 };
+
+exports.forgotPassword = (req, res) => {
+	handleResponse(userUpdate.forgotPassword(req), res);
+};
+
+exports.resetPassword = (req, res) => {
+	handleResponse(userUpdate.resetPassword(req), res);
+};

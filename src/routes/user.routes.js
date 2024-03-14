@@ -21,4 +21,10 @@ router.post("/update", verifyToken, validate(rules.updateUser), user.update);
 // Delete a user
 router.post("/delete", verifyToken, user.deleteUser);
 
+// forgot password
+router.post("/forgotPassword", validate(rules.forgotPassword), user.forgotPassword);
+
+// reset password
+router.post("/resetPassword", validate(rules.resetPassword), user.resetPassword);
+
 module.exports = router;

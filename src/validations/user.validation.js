@@ -75,6 +75,18 @@ module.exports = {
 			.toInt(),
 		query("search", "search parameter should be string").default(" "),
 	],
+	
+	// POST /api/users/forgotPassword
+	forgotPassword: [
+		body("email").notEmpty().isEmail(),
+	],
+	
+	// POST /api/users/resetPassword
+	resetPassword: [
+		body("email").notEmpty().isEmail(),
+		body("newPassword").notEmpty().isString().isLength({ min: 8 }),
+		body("confirmPassword").notEmpty().isString().isLength({ min: 8 })
+	],
 
 	// GET /api/users/:id
 	getUserById: [

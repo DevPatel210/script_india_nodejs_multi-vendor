@@ -5,6 +5,8 @@ const makeMongoDbServiceUser = require("../../../services/mongoDbService")({
 });
 const _ = require("lodash");
 const { response, resMessage } = require("../../../helpers/common");
+const { sendEmail } = require("../../../services/email");
+const { hashPassword, comparePassword } = require("../../../services/bcryptService");
 
 // Update user
 exports.Update = async (req) => {
@@ -26,3 +28,62 @@ exports.Update = async (req) => {
     return response(true, null, error.message, error.stack,500);
   }
 };
+
+// forgot password
+exports.forgotPassword = async (req) => {
+  try {
+    const email = req.body.email;
+    let isuser = await makeMongoDbServiceUser.getDocumentByQuery({email});
+
+    if (!isuser || isuser.length==0) {
+      return response(true, resMessage.userNotFound, null,[],404);
+    }
+    console.log(isuser);
+    const message = getForgotPasswordMessage();
+		await sendEmail(isuser[0].email,'Reset Your Password', message);
+
+    return response(false, 'Forgot password email sent successfully', null, null,200);
+  } catch (error) {
+    return response(true, null, error.message, error.stack,500);
+  }
+};
+
+// reset password
+exports.resetPassword = async (req) => {
+  try {
+    const email = req.body.email;
+    let isuser = await makeMongoDbServiceUser.getDocumentByQuery({email});
+
+    if (!isuser || isuser.length==0) {
+      return response(true, resMessage.userNotFound, null,[],404);
+    }
+
+    isuser = isuser[0];
+    const { newPassword, confirmPassword } = req.body;
+        
+    // Check if newPassword and confirmPassword match
+    if (newPassword !== confirmPassword) {
+      return response(false, 'Confirm password does not match new password', null, null,400);
+    }
+
+    // Hash the new password
+    const hashedNewPassword = await hashPassword(newPassword);
+
+    // Update password in the database
+    const updatedUser = await makeMongoDbServiceUser.updateDocument(isuser._id, { password: hashedNewPassword });
+
+    return response(false, 'Password updated succfully', null, updatedUser,200);
+  } catch (error) {
+    return response(true, null, error.message, error.stack,500);
+  }
+};
+
+function getForgotPasswordMessage(){
+	return `
+		You recently requested to reset your password. To reset your password, please click on the link below:
+    <br>
+    http://Clavierlabs.com
+    <br><br>
+    If you did not request this change, you can safely ignore this email. Your password will remain unchanged.
+	`
+}
