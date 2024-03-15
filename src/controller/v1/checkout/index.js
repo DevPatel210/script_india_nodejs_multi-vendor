@@ -27,6 +27,10 @@ exports.deleteOrder = (req, res) => {
     handleResponse(getOrder.delete(req), res);
 };
 
+exports.cancelOrder = (req, res) => {
+    handleResponse(getOrder.cancel(req), res);
+};
+
 exports.addTrackingDetails = (req, res) => {
     handleResponse(getOrder.addTrackingDetails(req), res);
 };

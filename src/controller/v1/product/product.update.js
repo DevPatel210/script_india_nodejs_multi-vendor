@@ -40,7 +40,7 @@ exports.Update = async (req) => {
       const productDetails = await makeMongoDbService.getSingleDocumentById(req.body.product_id);
       const vendorDetails = await makeMongoDbServiceVendor.getSingleDocumentById(isProduct.vendor);
       const message = getPendingApprovalMessage(productDetails, vendorDetails);
-		  await sendEmail('','New/Update Product Approval Pending', message);
+		  await sendEmail('','Update Product Approval Pending', message);
     }
 
     return response(false, resMessage.success, null, updatedProduct,200);
@@ -116,11 +116,11 @@ function getPendingApprovalMessage(product, vendor){
 	return `
 		A product has been updated by a vendor and is currently pending your approval.
     <br><br>
-    Product Details:
-    - Product Title: ${product.title}
-    - Vendor Name: ${vendor.first_name} ${vendor.last_name}
-    - Description: ${product.description}
-    - Price: ${product.price}
+    Product Details: <br>
+    - Product Title: ${product.title} <br>
+    - Vendor Name: ${vendor.first_name} ${vendor.last_name} <br>
+    - Description: ${product.description} <br>
+    - Price: $ ${product.price} <br>
     <br><br>
     Please review the product and take necessary action.
 	`
@@ -129,10 +129,10 @@ function getPendingApprovalMessage(product, vendor){
 function getApprovedMessage(product){
 	return `
 		We are pleased to inform you that your product has been approved by the admin and is now live on our platform.
-
-    Product Details:
-    - Product Name: ${product.title}
-    - Description: ${product.description}
-    - Price: ${product.price}
+    <br><br>
+    Product Details: <br>
+    - Product Name: ${product.title} <br>
+    - Description: ${product.description} <br>
+    - Price: $ ${product.price} <br>
 	`
 }

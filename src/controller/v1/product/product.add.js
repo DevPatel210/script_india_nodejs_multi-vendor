@@ -1,6 +1,10 @@
 const { Product } = require("../../../models/product.model");
+const { Vendor } = require("../../../models/vendor.model");
 const makeMongoDbService = require("../../../services/mongoDbService")({
   model: Product,
+});
+const makeMongoDbServiceVendor = require("../../../services/mongoDbService")({
+  model: Vendor,
 });
 const { response, resMessage } = require("../../../helpers/common");
 const { sendEmail } = require("../../../services/email");
@@ -13,9 +17,9 @@ exports.create = async (req) => {
     }
     const newProduct = await makeMongoDbService.createDocument(req.body);
 
-    const vendorDetails = await makeMongoDbServiceVendor.getSingleDocumentById(isProduct.vendor);
+    const vendorDetails = await makeMongoDbServiceVendor.getSingleDocumentById(req.body.vendor);
     const message = getPendingApprovalMessage(newProduct, vendorDetails);
-    await sendEmail('','New/Update Product Approval Pending', message);
+    await sendEmail('','New Product Approval Pending', message);
 
     return response(
       false,
@@ -34,11 +38,11 @@ function getPendingApprovalMessage(product, vendor){
 	return `
 		A new product has been added by a vendor and is currently pending your approval.
     <br><br>
-    Product Details:
-    - Product Title: ${product.title}
-    - Vendor Name: ${vendor.first_name} ${vendor.last_name}
-    - Description: ${product.description}
-    - Price: ${product.price}
+    Product Details: <br>
+    - Product Title: ${product.title} <br>
+    - Vendor Name: ${vendor.first_name} ${vendor.last_name} <br>
+    - Description: ${product.description} <br>
+    - Price: $ ${product.price} <br>
     <br><br>
     Please review the product and take necessary action.
 	`

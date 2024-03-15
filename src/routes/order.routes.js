@@ -17,4 +17,6 @@ router.post("/addTrackingDetails", verifyToken, isVendor, validate(rules.addTrac
 
 router.post("/delete", validate(rules.deleteOrder), order.deleteOrder);
 
+router.post("/cancel", validate(rules.deleteOrder), order.cancelOrder);
+
 module.exports = router;

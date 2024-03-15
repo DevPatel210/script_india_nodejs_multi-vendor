@@ -304,6 +304,28 @@ exports.delete = async (req) => {
     }
 }
 
+exports.cancel = async (req) => {
+    try {
+        let isorder = await makeMongoDbService.getDocumentById(req.body.order_id);
+        if (!isorder) {
+          return response(true, resMessage.orderNotFound, null,[],404);
+        }
+        const updatedOrder = await makeMongoDbService.findOneAndUpdateDocument(
+          { _id: req.body.order_id },
+          {status: 'C'}
+        );
+        
+        const orderDetails = await makeMongoDbService.getSingleDocumentById(req.body.order_id);
+        const userDetails = await makeMongoDbServiceUser.getSingleDocumentById(orderDetails.user_id);
+        const message = getCancelOrderMessage(orderDetails);
+        await sendEmail(userDetails.email,'Order Cancellation Confirmation', message);
+        
+        return response(false, "Order Cancelled Successfully", null, updatedOrder,200);
+    } catch (error) {
+        throw response(true, null, error.message, error.stack,500);
+    }
+}
+
 exports.addTrackingDetails = async (req) => {
     try {
         if(req.isVendor){
@@ -355,5 +377,30 @@ function getAddShippingMessage(order){
 		<h4>Remarks:</h4> ${order.trackingDetails.remarks}
 		<h4>Tracking carrier:</h4> ${order.trackingDetails.carrier}
 		<h4>Delivery Date:</h4> ${order.trackingDetails.delivery_date}
+	`
+}
+
+function getCancelOrderMessage(order){
+    const productList = order.accounting.cartAccountingList.map((product)=>{
+		return `<li>
+			Title: ${product.productName} <br>
+			Category: ${product.category} <br>
+			Unit Price: $ ${product.finalUnitPrice} <br>
+			Quantity: ${product.quantity} <br>
+			Total Price: $ ${product.totalPrice} <br>
+		</li>`
+	});
+	return `
+		We have received your request to cancel the order with below details.
+        <br>
+        - Order ID: ${order._id.toString()} <br>
+        - Total Amount: $ ${order.accounting.finalTotal} <br>
+        <br><br>
+        <h4>Products List:</h4>
+		<ul>
+			${productList.join('')}
+		</ul>
+        <br>
+        Your request for cancellation has been successfully processed. The order has been cancelled as per your request.
 	`
 }
