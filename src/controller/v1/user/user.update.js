@@ -38,11 +38,11 @@ exports.forgotPassword = async (req) => {
     if (!isuser || isuser.length==0) {
       return response(true, resMessage.userNotFound, null,[],404);
     }
-    console.log(isuser);
+
     const message = getForgotPasswordMessage();
 		await sendEmail(isuser[0].email,'Reset Your Password', message);
 
-    return response(false, 'Forgot password email sent successfully', null, null,200);
+    return response(false, 'Forgot password email sent successfully', null, {userId: isuser[0]._id.toString()},200);
   } catch (error) {
     return response(true, null, error.message, error.stack,500);
   }
@@ -51,8 +51,8 @@ exports.forgotPassword = async (req) => {
 // reset password
 exports.resetPassword = async (req) => {
   try {
-    const email = req.body.email;
-    let isuser = await makeMongoDbServiceUser.getDocumentByQuery({email});
+    const id = req.body.userId;
+    let isuser = await makeMongoDbServiceUser.getDocumentByQuery({_id: id});
 
     if (!isuser || isuser.length==0) {
       return response(true, resMessage.userNotFound, null,[],404);

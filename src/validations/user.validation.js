@@ -83,7 +83,7 @@ module.exports = {
 	
 	// POST /api/users/resetPassword
 	resetPassword: [
-		body("email").notEmpty().isEmail(),
+		body("userId").notEmpty().isString().isMongoId(),
 		body("newPassword").notEmpty().isString().isLength({ min: 8 }),
 		body("confirmPassword").notEmpty().isString().isLength({ min: 8 })
 	],
