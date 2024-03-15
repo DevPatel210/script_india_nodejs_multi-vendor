@@ -39,8 +39,8 @@ exports.forgotPassword = async (req) => {
       return response(true, resMessage.userNotFound, null,[],404);
     }
 
-    const message = getForgotPasswordMessage();
-		await sendEmail(isuser[0].email,'Reset Your Password', message);
+    const message = getForgotPasswordMessage(isuser[0]._id.toString());
+		await sendEmail(isuser[0].email,'Reset Your Password', message, true);
 
     return response(false, 'Forgot password email sent successfully', null, {userId: isuser[0]._id.toString()},200);
   } catch (error) {
@@ -78,11 +78,11 @@ exports.resetPassword = async (req) => {
   }
 };
 
-function getForgotPasswordMessage(){
+function getForgotPasswordMessage(userId){
 	return `
 		You recently requested to reset your password. To reset your password, please click on the link below:
     <br>
-    http://Clavierlabs.com
+    http://Clavierlabs.com/new-password/${userId}
     <br><br>
     If you did not request this change, you can safely ignore this email. Your password will remain unchanged.
 	`

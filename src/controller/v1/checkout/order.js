@@ -331,7 +331,7 @@ exports.addTrackingDetails = async (req) => {
 
             const user = await makeMongoDbServiceUser.getDocumentById(order.user_id);
             const message = getAddShippingMessage(order);
-            await sendEmail(user.email,'Order is shipped', message);
+            await sendEmail(user.email,'Order is shipped', message, true);
         
             return response(false, resMessage.orderUpdated, null, updatedOrder,200);
         }

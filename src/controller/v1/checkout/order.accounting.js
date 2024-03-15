@@ -122,7 +122,7 @@ exports.accounting = async (req) => {
 			trackingDetails: {},
 			// paymentId,
 		})
-		await sendEmail(req.user.email,'Order Placed', message);
+		await sendEmail(req.user.email,'Order Placed', message, true);
 		return response(false, resMessage.success, null, {
 			...orderAccounting,
 			order_id: responseData._id.toString(),

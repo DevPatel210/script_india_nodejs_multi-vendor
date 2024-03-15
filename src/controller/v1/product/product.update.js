@@ -1,8 +1,13 @@
 const { Product } = require("../../../models/product.model");
+const { Vendor } = require("../../../models/vendor.model");
 const makeMongoDbService = require("../../../services/mongoDbService")({
   model: Product,
 });
+const makeMongoDbServiceVendor = require("../../../services/mongoDbService")({
+  model: Vendor,
+});
 const { response, resMessage } = require("../../../helpers/common");
+const { sendEmail } = require("../../../services/email");
 
 // Update Product
 exports.Update = async (req) => {
@@ -30,6 +35,13 @@ exports.Update = async (req) => {
       { _id: req.body.product_id },
       productData
     );
+
+    if(req.isVendor){
+      const productDetails = await makeMongoDbService.getSingleDocumentById(req.body.product_id);
+      const vendorDetails = await makeMongoDbServiceVendor.getSingleDocumentById(isProduct.vendor);
+      const message = getPendingApprovalMessage(productDetails, vendorDetails);
+		  await sendEmail('','New/Update Product Approval Pending', message);
+    }
 
     return response(false, resMessage.success, null, updatedProduct,200);
   } catch (error) {
@@ -60,8 +72,13 @@ exports.approveProduct = async (req) => {
       isProduct
     );
 
+    const vendorDetails = await makeMongoDbServiceVendor.getSingleDocumentById(isProduct.vendor);
+    const message = getApprovedMessage(isProduct);
+		await sendEmail(vendorDetails.email,'Product Approval Notification', message, true);
+
     return response(false, resMessage.success, null, updatedProduct,200);
   } catch (error) {
+    console.log(error);
     return response(true, null, error.message, error.stack,500);
   }
 }
@@ -93,4 +110,29 @@ exports.unApproveProduct = async (req) => {
   } catch (error) {
     return response(true, null, error.message, error.stack,500);
   }
+}
+
+function getPendingApprovalMessage(product, vendor){
+	return `
+		A product has been updated by a vendor and is currently pending your approval.
+    <br><br>
+    Product Details:
+    - Product Title: ${product.title}
+    - Vendor Name: ${vendor.first_name} ${vendor.last_name}
+    - Description: ${product.description}
+    - Price: ${product.price}
+    <br><br>
+    Please review the product and take necessary action.
+	`
+}
+
+function getApprovedMessage(product){
+	return `
+		We are pleased to inform you that your product has been approved by the admin and is now live on our platform.
+
+    Product Details:
+    - Product Name: ${product.title}
+    - Description: ${product.description}
+    - Price: ${product.price}
+	`
 }
