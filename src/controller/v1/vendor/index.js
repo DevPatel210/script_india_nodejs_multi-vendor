@@ -13,6 +13,10 @@ exports.findAll = (req, res) => {
 	handleResponse(vendorGet.findAll(req), res);
 };
 
+exports.getAllCartProducts = (req, res) => {
+	handleResponse(vendorGet.getAllCartProducts(req), res);
+};
+
 exports.findById = (req, res) => {
 	handleResponse(vendorGet.findById(req), res);
 };

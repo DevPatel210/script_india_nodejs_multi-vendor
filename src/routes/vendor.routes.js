@@ -15,6 +15,9 @@ router.get("/all", isAdmin, validate(rules.listVendors), vendor.findAll);
 // Retrieve a single vendor with id
 router.get("/", verifyToken, vendor.findById);
 
+// Retrieve all the products in the cart by users for a vendor
+router.get("/getAllCartProducts", isVendor, vendor.getAllCartProducts);
+
 // Update a vendor
 router.post("/update", isVendor, validate(rules.updateVendor), vendor.update);
 

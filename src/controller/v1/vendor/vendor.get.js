@@ -1,7 +1,11 @@
 const { response, resMessage } = require("../../../helpers/common");
 const { Vendor } = require("../../../models/vendor.model");
+const { Cart } = require("../../../models/cart.model");
 const makeMongoDbService = require("../../../services/mongoDbService")({
   model: Vendor,
+});
+const makeMongoDbServiceCart = require("../../../services/mongoDbService")({
+  model: Cart,
 });
 
 // Retrieve and return all vendors from the database.
@@ -87,6 +91,39 @@ exports.findById = async (req) => {
 
     return response(false, null, resMessage.success, isVendor,200);
   } catch (error) {
+    return response(true, null, error.message, error.stack,500);
+  }
+};
+
+exports.getAllCartProducts = async (req) => {
+  try {
+    if (req.isVendor) {
+      let result = await makeMongoDbServiceCart.getDocumentByQueryPopulate({}, null, ["cartItems.product", "user"]);
+      result = result.filter((cart) => {
+        const products = cart.cartItems.filter((product) => {
+          // if(product.product && product.product.vendor && product.product.vendor.toString()==req.vendor._id.toString())
+          //   console.log(product.product);
+          return product.product && product.product.vendor && product.product.vendor.toString()==req.vendor._id.toString()
+        });
+        return products.length>0
+      });
+      result = result.filter((cart)=> cart.cartItems.length>0);
+      result = result.map((cart) => {
+        const products = cart.cartItems.filter((product) => product.product && product.product.vendor && product.product.vendor.toString()==req.vendor._id.toString());
+
+        return {
+          user: cart.user,
+          products: products.map((product) => {
+            return {...product.product._doc,quantity: product.quantity}
+          }),
+        }
+      })
+      return response(false, null, resMessage.success, result,200);
+    } else {
+      return response(true, null, 'Only vendors can access this API', null, 403);
+    }
+  } catch (error) {
+    console.log(error);
     return response(true, null, error.message, error.stack,500);
   }
 };
