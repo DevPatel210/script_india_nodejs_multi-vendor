@@ -310,6 +310,9 @@ exports.cancel = async (req) => {
         if (!isorder) {
           return response(true, resMessage.orderNotFound, null,[],404);
         }
+        if (isorder.status=='S' || isorder.status=='R') {
+            return response(true, 'Cannot cancel a order which is already shipped or delivered', null,[],400);
+        }
         const updatedOrder = await makeMongoDbService.findOneAndUpdateDocument(
           { _id: req.body.order_id },
           {status: 'C'}

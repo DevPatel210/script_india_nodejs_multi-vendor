@@ -22,6 +22,15 @@ exports.findAll = async (req) => {
         ]
       };
 
+      let sortCriteria = { _id: -1 };
+      if(req.query && req.query.sort) {
+        if (req.query.sort=='atoz') {
+          sortCriteria = { first_name: 1, last_name: 1 };
+        } else if (req.query.sort=='ztoa') {
+          sortCriteria = { first_name: -1, last_name: -1 };
+        }
+      }
+
       if (searchValue && searchValue.trim() !== "") {
         matchCondition['$and'].push({
           $or: [
@@ -39,7 +48,6 @@ exports.findAll = async (req) => {
           ],
         });
       }
-      const sortCriteria = { _id: -1 }; // Sort by the '_id' field in descending order (newest first)
 
       const userList = await makeMongoDbService.getDocumentByCustomAggregation([
         {
