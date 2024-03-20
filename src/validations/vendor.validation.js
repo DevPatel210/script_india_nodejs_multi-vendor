@@ -4,6 +4,13 @@ const makeMongoDbServiceVendor = require("../services/mongoDbService")({
 	model: Vendor,
 });
 
+const customValidator = (value) => {
+  if (typeof value === 'string' || Array.isArray(value)) {
+    return true;
+  }
+  return false;
+};
+
 module.exports = {
   // POST /api/vendors/add
   createVendor: [
@@ -19,6 +26,10 @@ module.exports = {
       .isString()
       .isLength({ min: 8 }),
     body("status", "Invalid status").optional().isIn(["A", "D"]).default('A').notEmpty().isString(),
+    body("phone_number", "Invalid phone_number").notEmpty().isNumeric().isLength({min: 10}),
+    body("address", "Invalid address").notEmpty().isString(),
+    body("taxId", "Invalid taxId").optional().notEmpty().isString(),
+		body("image", "image can not be empty").notEmpty().isArray(),
   ],
 
 	// POST /api/vendor/update
@@ -41,6 +52,10 @@ module.exports = {
 			.default("A")
 			.notEmpty()
 			.isString(),
+		body("phone_number", "Invalid phone_number").optional().notEmpty().isNumeric().isLength({min: 10}),
+    body("address", "Invalid address").optional().notEmpty().isString(),
+    body("taxId", "Invalid taxId").optional().notEmpty().isString(),
+		body("image", "image can not be empty").optional().notEmpty().custom(customValidator),
 	],
 
 	// POST /api/vendor/all

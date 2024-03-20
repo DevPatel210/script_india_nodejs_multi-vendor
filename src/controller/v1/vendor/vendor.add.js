@@ -33,6 +33,10 @@ exports.create = async (req) => {
 				"first_name",
 				"last_name",
 				"email",
+				"phone_number",
+				"address",
+				"taxId",
+				"image"
 			]),
 			201
 		);

@@ -48,6 +48,10 @@ exports.findAll = async (req) => {
             email: 1,
             status: 1,
             commission:1,
+            phone_number:1,
+            address:1,
+            taxId:1,
+            image:1,
           },
         },
         { $sort: sortCriteria }, // Add the $sort stage to sort the documents
@@ -116,12 +120,15 @@ exports.getAllCartProducts = async (req) => {
       result = result.filter((cart)=> cart.cartItems.length>0);
       result = result.map((cart) => {
         const products = cart.cartItems.filter((product) => product.product && product.product.vendor && product.product.vendor.toString()==req.vendor._id.toString());
-
+        let total = 0;
+        const mappedProducts = products.map((product) => {
+          total += parseFloat(product.quantity*product.product.price)
+          return {...product.product._doc,quantity: product.quantity}
+        })
         return {
           user: cart.user,
-          products: products.map((product) => {
-            return {...product.product._doc,quantity: product.quantity}
-          }),
+          totalPrice: total,
+          products: mappedProducts,
         }
       });
       const totalCount = result.length;

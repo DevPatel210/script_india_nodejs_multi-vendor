@@ -5,9 +5,10 @@ const validate = require("../validations/handler");
 const rules = require("../validations/vendor.validation");
 const vendor = require("../controller/v1/vendor");
 const { verifyToken, isAdmin, isVendor } = require("../middleware/auth.mdl");
+const { handleImageFile } = require("../services/multerService");
 
 // Create a new vendor
-router.post("/add", isAdmin,validate(rules.createVendor), vendor.create);
+router.post("/add", isAdmin, handleImageFile, validate(rules.createVendor), vendor.create);
 
 // Retrieve all vendors
 router.get("/all", isAdmin, validate(rules.listVendors), vendor.findAll);
@@ -19,7 +20,7 @@ router.get("/", verifyToken, vendor.findById);
 router.get("/getAllCartProducts", isVendor, vendor.getAllCartProducts);
 
 // Update a vendor
-router.post("/update", isVendor, validate(rules.updateVendor), vendor.update);
+router.post("/update", isVendor, handleImageFile, validate(rules.updateVendor), vendor.update);
 
 // Delete a vendor
 router.post("/delete", isAdmin, vendor.deleteVendor);

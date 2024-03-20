@@ -80,7 +80,7 @@ const productSchema = new mongoose.Schema({
 		required: true,
 	},
 	extraAttr: [extraAttrSchema],
-});
+},{timestamps: true});
 
 exports.Product = mongoose.model("Product", productSchema);
 exports.productSchema = productSchema;

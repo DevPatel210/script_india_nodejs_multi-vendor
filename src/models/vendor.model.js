@@ -32,6 +32,23 @@ const vendorSchema = mongoose.Schema({
     minlength: 1,
     maxlength: 1,
   },
+  phone_number: {
+    type: Number,
+    // min: 1,
+    // max: 5,
+    required: true
+  },
+  address: {
+    type: String,
+    required: true,
+  },
+  taxId: {
+    type: String,
+  },
+  image: {
+		type: Array,
+		required: true,
+	},
 });
 
 vendorSchema.method("toJSON", function () {

@@ -19,6 +19,9 @@ exports.Update = async (req) => {
     if(req.isVendor==true && vendorData.commission){
       delete vendorData.commission;
     }
+    if(typeof vendorData.image == 'string'){
+      delete vendorData.image;
+    }
     const updatedVendor = await makeMongoDbServiceVendor.findOneAndUpdateDocument(
       { _id: id },
       vendorData
