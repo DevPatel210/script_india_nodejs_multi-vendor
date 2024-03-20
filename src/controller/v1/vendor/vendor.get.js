@@ -98,6 +98,12 @@ exports.findById = async (req) => {
 exports.getAllCartProducts = async (req) => {
   try {
     if (req.isVendor) {
+      const pageNumber = parseInt(req.query.pageNumber);
+      if (isNaN(pageNumber) || pageNumber < 1) {
+        throw new Error('Invalid pageNumber');
+      }
+      const pageSize = 10;
+		  // const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
       let result = await makeMongoDbServiceCart.getDocumentByQueryPopulate({}, null, ["cartItems.product", "user"]);
       result = result.filter((cart) => {
         const products = cart.cartItems.filter((product) => {
@@ -117,8 +123,21 @@ exports.getAllCartProducts = async (req) => {
             return {...product.product._doc,quantity: product.quantity}
           }),
         }
-      })
-      return response(false, null, resMessage.success, result,200);
+      });
+      const totalCount = result.length;
+      result = result.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
+      meta = {
+			  pageNumber,
+        pageSize,
+        totalCount: totalCount,
+        prevPage: parseInt(pageNumber) === 1 ? false : true,
+        nextPage:
+          parseInt(totalCount) / parseInt(pageSize) <= parseInt(pageNumber)
+          ? false
+          : true,
+        totalPages: Math.ceil(parseInt(totalCount) / parseInt(pageSize)),
+      };
+      return response(false, null, resMessage.success, {result, meta},200);
     } else {
       return response(true, null, 'Only vendors can access this API', null, 403);
     }
