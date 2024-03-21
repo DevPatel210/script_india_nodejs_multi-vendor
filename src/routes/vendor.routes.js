@@ -11,7 +11,7 @@ const { handleImageFile } = require("../services/multerService");
 router.post("/add", isAdmin, handleImageFile, validate(rules.createVendor), vendor.create);
 
 // Retrieve all vendors
-router.get("/all", isAdmin, validate(rules.listVendors), vendor.findAll);
+router.get("/all", validate(rules.listVendors), vendor.findAll);
 
 // Retrieve a single vendor with id
 router.get("/", verifyToken, vendor.findById);

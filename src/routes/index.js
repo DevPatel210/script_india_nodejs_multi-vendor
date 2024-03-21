@@ -13,7 +13,7 @@ const { verifyToken } = require("../middleware/auth.mdl");
 
 router.use("/user", userRoutes);
 
-router.use("/vendor", verifyToken, vendorRoutes);
+router.use("/vendor", vendorRoutes);
 
 router.use("/auth", authRoutes);
 

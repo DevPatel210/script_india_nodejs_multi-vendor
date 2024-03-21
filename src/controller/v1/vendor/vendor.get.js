@@ -11,7 +11,7 @@ const makeMongoDbServiceCart = require("../../../services/mongoDbService")({
 // Retrieve and return all vendors from the database.
 exports.findAll = async (req) => {
   try {
-    if (req.user && req.user.isAdmin) {
+     {
       let meta = {};
       const pageNumber = parseInt(req.query.pageNumber);
       if (isNaN(pageNumber) || pageNumber < 1) {
@@ -78,7 +78,7 @@ exports.findAll = async (req) => {
         meta,
       },200);
     }
-    return response(true, null, resMessage.failed,[],400);
+    
   } catch (error) {
     return response(true, null, error.message, error.stack,500);
   }
