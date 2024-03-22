@@ -22,9 +22,15 @@ exports.findAll = async (req) => {
       const searchValue = req.query.search; // Replace with your actual search value
       const matchCondition = { 
         $and: [
-          {status: { $ne: 'D' }} 
+          {status: { $ne: 'D' }},
+          
+          
         ]
       };
+
+      if (req.query.display && req.query.display.toLowerCase() === 'true') {
+        matchCondition.display = true; // Filter vendors with display: true
+      }
 
       if (searchValue && searchValue.trim() !== "") {
         matchCondition['$and'].push({
@@ -52,6 +58,7 @@ exports.findAll = async (req) => {
             address:1,
             taxId:1,
             image:1,
+            display: 1 
           },
         },
         { $sort: sortCriteria }, // Add the $sort stage to sort the documents

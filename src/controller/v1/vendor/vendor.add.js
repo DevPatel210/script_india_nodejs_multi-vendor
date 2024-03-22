@@ -36,7 +36,8 @@ exports.create = async (req) => {
 				"phone_number",
 				"address",
 				"taxId",
-				"image"
+				"image",
+				"display",
 			]),
 			201
 		);

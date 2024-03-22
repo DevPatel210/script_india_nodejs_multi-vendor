@@ -49,6 +49,10 @@ const vendorSchema = mongoose.Schema({
 		type: Array,
 		required: true,
 	},
+  display: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 vendorSchema.method("toJSON", function () {
