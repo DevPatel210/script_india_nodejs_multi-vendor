@@ -93,7 +93,8 @@ exports.findById = async (req) => {
 		let matchCondition = { 
 			$and: [
 				{ category: isCategory._id.toString() },
-				{ status: { $ne: "D" } }
+				{ status: { $ne: "D" } },
+				
 			]
 		}
 
@@ -141,7 +142,19 @@ exports.findById = async (req) => {
 				});
 			}
 		}
+// Filter by origins
+if (req.query.origins) {
+	matchCondition.$and.push({
+		origins: req.query.origins
+	});
+}
 
+// Filter by missions
+if (req.query.missions) {
+	matchCondition.$and.push({
+		missions: req.query.missions
+	});
+}
 		let productsList = await makeMongoDbServiceProduct.getDocumentByCustomAggregation([
 			{ $match: matchCondition },
 			{ $sort: sortCriteria },
