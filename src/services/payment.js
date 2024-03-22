@@ -37,4 +37,5 @@ async function verifyPayment(paymentId) {
 module.exports = {
   createPaymentIntent: createPaymentIntent,
   verifyPayment: verifyPayment,
+  // Hello
 };
