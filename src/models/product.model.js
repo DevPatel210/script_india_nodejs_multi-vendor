@@ -62,10 +62,10 @@ const productSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
-	missions:{
-		type: String,
-		required: true,
-	},
+	// missions:{
+	// 	type: String,
+	// 	required: true,
+	// },
 	roast:{
 		type: String,
 		required: true,
