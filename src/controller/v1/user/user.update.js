@@ -82,7 +82,7 @@ function getForgotPasswordMessage(userId){
 	return `
 		You recently requested to reset your password. To reset your password, please click on the link below:
     <br>
-    http://Clavierlabs.com/new-password/${userId}
+    https://demo.scriptindia.in:8006/new-password/${userId}
     <br><br>
     If you did not request this change, you can safely ignore this email. Your password will remain unchanged.
 	`
