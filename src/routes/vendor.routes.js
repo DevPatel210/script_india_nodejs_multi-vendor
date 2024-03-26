@@ -17,7 +17,7 @@ router.get("/all", validate(rules.listVendors), vendor.findAll);
 router.get("/", verifyToken, vendor.findById);
 
 // Retrieve all the products in the cart by users for a vendor
-router.get("/getAllCartProducts", isVendor, vendor.getAllCartProducts);
+router.get("/getAllCartProducts", verifyToken, isVendor, vendor.getAllCartProducts);
 
 // Update a vendor
 router.post("/update", isVendor, handleImageFile, validate(rules.updateVendor), vendor.update);

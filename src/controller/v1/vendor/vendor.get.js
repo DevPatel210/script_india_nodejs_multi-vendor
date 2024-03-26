@@ -121,7 +121,9 @@ exports.getAllCartProducts = async (req) => {
           // if(product.product && product.product.vendor && product.product.vendor.toString()==req.vendor._id.toString())
           //   console.log(product.product);
           return product.product && product.product.vendor && product.product.vendor.toString()==req.vendor._id.toString()
+
         });
+        
         return products.length>0
       });
       result = result.filter((cart)=> cart.cartItems.length>0);
