@@ -27,6 +27,10 @@ exports.getOrderCancel = (req, res) => {
     handleResponse(getOrder.getCancel(req), res);
 }
 
+exports.getOrderPaymentFailed = (req, res) => {
+    handleResponse(getOrder.getPaymentFailed(req), res);
+}
+
 exports.getOrdersByDate = (req, res) => {
     handleResponse(getOrder.getByDate(req), res);
 };
