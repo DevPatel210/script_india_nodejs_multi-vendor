@@ -19,6 +19,10 @@ exports.getOrderPaid = (req, res) => {
     handleResponse(getOrder.getPaid(req), res);
 }
 
+exports.getOrderShipped = (req, res) => {
+    handleResponse(getOrder.getShipped(req), res);
+}
+
 exports.getOrdersByDate = (req, res) => {
     handleResponse(getOrder.getByDate(req), res);
 };

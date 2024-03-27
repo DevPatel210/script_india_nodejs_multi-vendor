@@ -10,6 +10,12 @@ module.exports = {
 		query("order_id", "Enter valid order id").notEmpty().optional().isString().isMongoId(),
 		query("pageNumber", "pageNumber parameter should be number").default(1).toInt(),
 	],
+
+	getOrderShipped: [
+		query("order_id", "Enter valid order id").notEmpty().optional().isString().isMongoId(),
+		query("pageNumber", "pageNumber parameter should be number").default(1).toInt(),
+	],
+	
 	
 	getOrdersByDate: [
 		query("startDate", "Enter valid order id").notEmpty().isString(),
