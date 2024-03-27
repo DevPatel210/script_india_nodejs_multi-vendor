@@ -191,6 +191,324 @@ exports.get = async (req) => {
 	}
 };
 
+// exports.getPaid = async (req) => {
+//     try {
+//         let meta = {};
+//         const pageNumber = parseInt(req.query.pageNumber);
+//         if (isNaN(pageNumber) || pageNumber < 1) {
+//             throw new Error('Invalid pageNumber');
+//         }
+//         const pageSize = 10;
+//         const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
+//         const sortCriteria = { _id: -1 };
+//         const searchValue = req.query.search || '';
+//         let orderCount = 0;
+//         let result = {};
+//         let matchCondition = {
+//             $and: [
+//                 { status: 'P' } // Filter orders with status 'P' (paid)
+//             ]
+//         };
+
+//         if (searchValue && searchValue.trim() !== "") {
+//             matchCondition['$and'].push({
+//                 $or: [
+//                     { payment_status: { $regex: searchValue, $options: "i" } },
+//                     { status: { $regex: searchValue, $options: "i" } },
+//                     { vendorNames: { $regex: searchValue, $options: "i" } },
+//                 ],
+//             });
+//         }
+
+//         let products = await makeMongoDbServiceProduct.getDocumentByQuery({
+//             status: { $ne: 'D' }
+//         });
+//         products = products.reduce((obj, item) => (obj[item._id] = item, obj), {});
+
+//         let vendors = await makeMongoDbServiceVendor.getDocumentByQuery({
+//             status: { $ne: 'D' }
+//         });
+//         vendors = vendors.reduce((obj, item) => (obj[item._id] = item, obj), {});
+
+//         result = await makeMongoDbService.getDocumentByCustomAggregation([
+//             { $match: matchCondition },
+//             { $sort: sortCriteria },
+//             { $skip: skip },
+//             { $limit: pageSize },
+//         ]);
+//         orderCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
+
+//         meta = {
+//             pageNumber,
+//             pageSize,
+//             totalCount: orderCount,
+//             prevPage: parseInt(pageNumber) === 1 ? false : true,
+//             nextPage:
+//                 parseInt(orderCount) / parseInt(pageSize) <= parseInt(pageNumber)
+//                     ? false
+//                     : true,
+//             totalPages: Math.ceil(parseInt(orderCount) / parseInt(pageSize)),
+//         };
+
+//         result = result.map((order) => {
+//             const filteredOrder = { ...order };
+//             filteredOrder.accounting.cartAccountingList = order.accounting.cartAccountingList.map((product) => {
+//                 const productDetails = products[product.productId.toString()]
+//                 const vendorDetails = vendors[product.vendorId.toString()]
+//                 return {
+//                     ...product,
+//                     productDetails: (!productDetails) ? {} : productDetails,
+//                     vendorDetails: (!vendorDetails) ? {} : vendorDetails
+//                 }
+//             });
+//             return filteredOrder
+//         })
+
+//         return response(false, null, resMessage.success, {
+//             result,
+//             meta,
+//             usesDetails: req.user
+//         }, 200);
+//     } catch (error) {
+//         throw response(true, null, error.message, error.stack, 500);
+//     }
+// };
+
+
+// exports.getPaid = async (req) => {
+//     try {
+//         let meta = {};
+//         const pageNumber = parseInt(req.query.pageNumber);
+//         if (isNaN(pageNumber) || pageNumber < 1) {
+//             throw new Error('Invalid pageNumber');
+//         }
+//         const pageSize = 10;
+//         const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
+//         const sortCriteria = { _id: -1 };
+//         const searchValue = req.query.search || '';
+//         let orderCount = 0;
+//         let result = {};
+//         let matchCondition = {
+//             $and: [
+//                 { status: 'P' } // Filter orders with status 'P' (paid)
+//             ]
+//         };
+
+//         // Ensure the request is from a vendor and fetch vendor ID from the token
+//         if (!req.vendor || !req.vendor._id) {
+//             throw new Error('Vendor information not found in token');
+//         }
+
+//         // Add condition to filter orders by the vendor ID
+//         matchCondition.$and.push({ vendors: req.vendor._id });
+
+//         if (searchValue && searchValue.trim() !== "") {
+//             matchCondition['$and'].push({
+//                 $or: [
+//                     { payment_status: { $regex: searchValue, $options: "i" } },
+//                     { status: { $regex: searchValue, $options: "i" } },
+//                     { vendorNames: { $regex: searchValue, $options: "i" } },
+//                 ],
+//             });
+//         }
+
+//         // Fetch products and vendors for further processing
+//         let products = await makeMongoDbServiceProduct.getDocumentByQuery({
+//             status: { $ne: 'D' }
+//         });
+//         products = products.reduce((obj, item) => (obj[item._id] = item, obj), {});
+
+//         let vendors = await makeMongoDbServiceVendor.getDocumentByQuery({
+//             status: { $ne: 'D' }
+//         });
+//         vendors = vendors.reduce((obj, item) => (obj[item._id] = item, obj), {});
+
+//         // Fetch orders based on the defined conditions
+//         result = await makeMongoDbService.getDocumentByCustomAggregation([
+//             { $match: matchCondition },
+//             { $sort: sortCriteria },
+//             { $skip: skip },
+//             { $limit: pageSize },
+//         ]);
+        
+//         // Get total order count
+//         orderCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
+
+//         result = result.map((order) => {
+//             const filteredOrder = {...order};
+//             const filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id);
+//             let totalPrice = 0;
+//             for(let product of filteredProducts){
+//                 totalPrice += product.totalPrice;
+//             }
+
+//             filteredOrder.accounting.cartAccountingList = filteredProducts;
+//             filteredOrder.vendorNames = filteredOrder.vendorNames ? (filteredOrder.vendorNames.map((name)=> {
+//                 let arr = name.split(' ');
+//                 arr = arr.slice(0,arr.length-1);
+//                 return arr.join(' ');
+//             })) : [];
+//             filteredOrder.accounting.finalTotal = totalPrice;
+//             return filteredOrder     
+//         })
+
+//         // Construct meta data for pagination
+//         meta = {
+//             pageNumber,
+//             pageSize,
+//             totalCount: orderCount,
+//             prevPage: parseInt(pageNumber) === 1 ? false : true,
+//             nextPage: parseInt(orderCount) / parseInt(pageSize) <= parseInt(pageNumber) ? false : true,
+//             totalPages: Math.ceil(parseInt(orderCount) / parseInt(pageSize)),
+//         };
+
+//         // Map products and vendors to orders
+//         result = result.map((order) => {
+//             const filteredOrder = { ...order };
+//             filteredOrder.accounting.cartAccountingList = order.accounting.cartAccountingList.map((product) => {
+//                 const productDetails = products[product.productId.toString()]
+//                 const vendorDetails = vendors[product.vendorId.toString()]
+//                 return {
+//                     ...product,
+//                     productDetails: (!productDetails) ? {} : productDetails,
+//                     vendorDetails: (!vendorDetails) ? {} : vendorDetails
+//                 }
+//             });
+//             return filteredOrder
+//         })
+
+//         // Return response with orders, meta data, and user details
+//         return response(false, null, resMessage.success, {
+//             result,
+//             meta,
+//             usesDetails: req.user
+//         }, 200);
+//     } catch (error) {
+//         // Handle errors
+//         throw response(true, null, error.message, error.stack, 500);
+//     }
+// };
+
+exports.getPaid = async (req) => {
+    try {
+        let meta = {};
+        const pageNumber = parseInt(req.query.pageNumber);
+        if (isNaN(pageNumber) || pageNumber < 1) {
+            throw new Error('Invalid pageNumber');
+        }
+        const pageSize = 10;
+        const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
+        const sortCriteria = { _id: -1 };
+        const searchValue = req.query.search || '';
+        let orderCount = 0;
+        let result = {};
+        let matchCondition = {
+            $and: [
+                { status: 'P' } // Filter orders with status 'P' (paid)
+            ]
+        };
+
+        // Ensure the request is from a vendor and fetch vendor ID from the token
+        if (!req.vendor || !req.vendor._id) {
+            throw new Error('Vendor information not found in token');
+        }
+
+        // Add condition to filter orders by the vendor ID
+        matchCondition.$and.push({ vendors: req.vendor._id });
+
+        if (searchValue && searchValue.trim() !== "") {
+            matchCondition['$and'].push({
+                $or: [
+                    { payment_status: { $regex: searchValue, $options: "i" } },
+                    { status: { $regex: searchValue, $options: "i" } },
+                    { vendorNames: { $regex: searchValue, $options: "i" } },
+                ],
+            });
+        }
+
+        // Fetch products and vendors for further processing
+        let products = await makeMongoDbServiceProduct.getDocumentByQuery({
+            status: { $ne: 'D' }
+        });
+        products = products.reduce((obj, item) => (obj[item._id] = item, obj), {});
+
+        let vendors = await makeMongoDbServiceVendor.getDocumentByQuery({
+            status: { $ne: 'D' }
+        });
+        vendors = vendors.reduce((obj, item) => (obj[item._id] = item, obj), {});
+
+        // Fetch orders based on the defined conditions
+        result = await makeMongoDbService.getDocumentByCustomAggregation([
+            { $match: matchCondition },
+            { $sort: sortCriteria },
+            { $skip: skip },
+            { $limit: pageSize },
+        ]);
+        
+        // Get total order count
+        orderCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
+
+        result = result.map((order) => {
+            const filteredOrder = {...order};
+            const filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id);
+            let totalPrice = 0;
+            for(let product of filteredProducts){
+                totalPrice += product.totalPrice;
+            }
+
+            filteredOrder.accounting.cartAccountingList = filteredProducts;
+            filteredOrder.vendorNames = filteredOrder.vendorNames ? (filteredOrder.vendorNames.map((name)=> {
+                let arr = name.split(' ');
+                arr = arr.slice(0,arr.length-1);
+                return arr.join(' ');
+            })) : [];
+            filteredOrder.accounting.finalTotal = totalPrice;
+            return filteredOrder     
+        })
+
+        // Construct meta data for pagination
+        meta = {
+            pageNumber,
+            pageSize,
+            totalCount: orderCount,
+            prevPage: parseInt(pageNumber) === 1 ? false : true,
+            nextPage: parseInt(orderCount) / parseInt(pageSize) <= parseInt(pageNumber) ? false : true,
+            totalPages: Math.ceil(parseInt(orderCount) / parseInt(pageSize)),
+        };
+
+        // Map products and vendors to orders and fetch user details
+        result = await Promise.all(result.map(async (order) => {
+            const filteredOrder = { ...order };
+            filteredOrder.accounting.cartAccountingList = order.accounting.cartAccountingList.map((product) => {
+                const productDetails = products[product.productId.toString()]
+                const vendorDetails = vendors[product.vendorId.toString()]
+                return {
+                    ...product,
+                    productDetails: (!productDetails) ? {} : productDetails,
+                    vendorDetails: (!vendorDetails) ? {} : vendorDetails
+                }
+            });
+
+            // Fetch user details by user_id
+            const userDetails = await makeMongoDbServiceUser.getDocumentById(order.user_id);
+            filteredOrder.userDetails = userDetails || {}; // Include user details in the order
+            return filteredOrder;
+        }));
+
+        // Return response with orders, meta data, and user details
+        return response(false, null, resMessage.success, {
+            result,
+            meta,
+            userDetails: req.user // Include vendor details as well
+        }, 200);
+    } catch (error) {
+        // Handle errors
+        throw response(true, null, error.message, error.stack, 500);
+    }
+};
+
+
+
 exports.getByDate = async (req) => {
 	try {
         let meta = {};
