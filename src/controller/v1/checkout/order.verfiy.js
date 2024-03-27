@@ -62,7 +62,7 @@ exports.verifyOrder = async (req) => {
 		if (paymentIntent.status === "succeeded") {
 			order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
 				{ _id: order_id },
-				{ payment_status : "C", paymentIntent }
+				{ payment_status : "C", status: 'P', paymentIntent }
 			);
 			const user = await makeMongoDbServiceUser.getDocumentById(order.user_id);
 			const message = getPaymentSuccessfulMessage(order);
@@ -71,7 +71,7 @@ exports.verifyOrder = async (req) => {
 		} else {
 			order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
 				{ _id: order_id },
-				{ payment_status: "PF" } // Update status to "PF" (Payment Failed)
+				{ payment_status: "PF", status: "PF" } // Update status to "PF" (Payment Failed)
 			);
 			return response(true, "Order payment failed.", null, order, 400);
 		}
@@ -79,7 +79,7 @@ exports.verifyOrder = async (req) => {
 		// If an error occurs, update the order status to "PF" and throw an error
 		const order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
 			{ _id: order_id },
-			{ payment_status: "PF" } // Update status to "PF" (Payment Failed)
+			{ payment_status: "PF", status: "PF" } // Update status to "PF" (Payment Failed)
 		);
 		throw response(true, null, error.message, error.stack, 500);
 	}

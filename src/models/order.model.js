@@ -27,7 +27,7 @@ const orderSchema = new mongoose.Schema(
 		},
 		status: {
 			type: String,
-			default: "P", // A,C,P,D,R(Received)
+			default: "P", // A,C,P,D,R(Received), PF(payment failed)
 			minlength: 1,
 			maxlength: 1,
 		},
@@ -48,7 +48,7 @@ const orderSchema = new mongoose.Schema(
 		},
 		payment_status: {
 			type: String,
-			default: "P", // I, C, P
+			default: "P", // I, C, P, PF
 			minlength: 1,
 			maxlength: 1,
 		},
