@@ -13,11 +13,51 @@ const makeMongoDbServiceUser = require("../../../services/mongoDbService")({
 });
 
 
+// exports.verifyOrder = async (req) => {
+// 	try {
+// 		let order;
+// 		let paymentId = req.body.paymentId;
+// 		let order_id = req.body.order_id;
+// 		let paymentIntent = await verifyPayment(paymentId);
+// 		if (paymentIntent.status === "succeeded") {
+// 			order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
+// 				{ _id: order_id },
+// 				{ payment_status : "C", paymentIntent }
+// 			);
+// 			const user = await makeMongoDbServiceUser.getDocumentById(order.user_id);
+// 			const message = getPaymentSuccessfulMessage(order);
+// 			await sendEmail(user.email,'Payment Successful', message);
+// 			return response(false, "Payment received successfully.", null, order,200);
+// 		} else {
+// 			order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
+// 				{ _id: order_id },
+// 				{ payment_status: "P" },
+// 				{ payment_status: "PF" }
+// 			);
+// 			return response(true, "Order payment is incomplete.", null, order,400);
+// 		}
+// 	} catch (error) {
+// 		throw response(true, null, error.message, error.stack,500);
+// 	}
+// };
+
 exports.verifyOrder = async (req) => {
 	try {
 		let order;
 		let paymentId = req.body.paymentId;
 		let order_id = req.body.order_id;
+
+		// Check if order_id is provided and is a valid ObjectId
+		if (!order_id || !mongoose.Types.ObjectId.isValid(order_id)) {
+			throw {
+				status: "BAD_REQUEST",
+				message: "The request cannot be fulfilled due to bad syntax",
+				data: {
+					order_id: "Enter valid order id"
+				}
+			};
+		}
+
 		let paymentIntent = await verifyPayment(paymentId);
 		if (paymentIntent.status === "succeeded") {
 			order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
@@ -27,18 +67,24 @@ exports.verifyOrder = async (req) => {
 			const user = await makeMongoDbServiceUser.getDocumentById(order.user_id);
 			const message = getPaymentSuccessfulMessage(order);
 			await sendEmail(user.email,'Payment Successful', message);
-			return response(false, "Payment received successfully.", null, order,200);
+			return response(false, "Payment received successfully.", null, order, 200);
 		} else {
 			order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
 				{ _id: order_id },
-				{ payment_status: "P" }
+				{ payment_status: "PF" } // Update status to "PF" (Payment Failed)
 			);
-			return response(true, "Order payment is incomplete.", null, order,400);
+			return response(true, "Order payment failed.", null, order, 400);
 		}
 	} catch (error) {
-		throw response(true, null, error.message, error.stack,500);
+		// If an error occurs, update the order status to "PF" and throw an error
+		const order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
+			{ _id: order_id },
+			{ payment_status: "PF" } // Update status to "PF" (Payment Failed)
+		);
+		throw response(true, null, error.message, error.stack, 500);
 	}
 };
+
 
 function getPaymentSuccessfulMessage(order){
 	return `
