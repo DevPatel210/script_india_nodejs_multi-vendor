@@ -23,6 +23,10 @@ exports.getOrderShipped = (req, res) => {
     handleResponse(getOrder.getShipped(req), res);
 }
 
+exports.getOrderCancel = (req, res) => {
+    handleResponse(getOrder.getCancel(req), res);
+}
+
 exports.getOrdersByDate = (req, res) => {
     handleResponse(getOrder.getByDate(req), res);
 };

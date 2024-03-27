@@ -13,6 +13,8 @@ router.get("/getPaid", validate(rules.getOrderPaid), order.getOrderPaid);
 
 router.get("/getShipped", validate(rules.getOrderShipped), order.getOrderShipped);
 
+router.get("/getCancel", validate(rules.getOrderCancel), order.getOrderCancel);
+
 router.get("/getByDate", validate(rules.getOrdersByDate), order.getOrdersByDate);
 
 router.post("/update", validate(rules.updateOrder), order.updateOrder);
