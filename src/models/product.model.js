@@ -1,3 +1,4 @@
+const { array } = require("joi");
 const mongoose = require("mongoose");
 
 const extraAttrSchema = new mongoose.Schema({
@@ -71,7 +72,7 @@ const productSchema = new mongoose.Schema({
 		required: true,
 	},
 	bean:{
-		type: String,
+		type: [String],
 		required: true,
 	},
 	vendor: {
