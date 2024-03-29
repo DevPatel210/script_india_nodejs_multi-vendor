@@ -15,6 +15,14 @@ exports.create = async (req) => {
     if(!req.body.vendor){
       req.body.vendor = req.vendor._id;
     }
+    
+    console.log('Before split:', req.body.bean);
+    if (req.body.bean && typeof req.body.bean === 'string') {
+      req.body.bean = req.body.bean.split(',');
+    }
+    console.log('After split:', req.body.bean);
+    
+
     const newProduct = await makeMongoDbService.createDocument(req.body);
 
     const vendorDetails = await makeMongoDbServiceVendor.getSingleDocumentById(req.body.vendor);
