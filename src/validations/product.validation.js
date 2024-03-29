@@ -42,7 +42,7 @@ module.exports = {
     body("origins", "origins can not be empty").optional().notEmpty().isString(),
     //body("missions", "missions can not be empty").optional().notEmpty().isString(),
     body("roast", "roast can not be empty").optional().notEmpty().isString(),
-    body("bean", "bean can not be empty").optional().notEmpty().isString(),
+    body("bean", "bean can not be empty").optional().notEmpty(),
     body("isSoldOut", "isSoldOut can not be empty").optional().optional().default(false).isBoolean(),
     body("extraAttr", "extraAttr can not be empty").optional().notEmpty().isArray()
   ],
