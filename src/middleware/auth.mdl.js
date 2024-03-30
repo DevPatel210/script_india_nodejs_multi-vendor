@@ -81,8 +81,9 @@ exports.isAdmin = async (req, res, next) => {
 					}
 					return decoded;
 				}
-			);	
-			if (decoded._id === "65af9e83bf2db94e4cf483be") {
+			);
+			const user = await makeMongoDbService.getDocumentById(decoded._id);
+			if (user && user.status!='D' && user.isAdmin) {
 				req.isAdmin = true;
 				next();
 			} else {

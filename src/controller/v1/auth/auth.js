@@ -37,7 +37,7 @@ exports.login = async (req) => {
 		delete user.password;
 		let token = await generateToken(user);
 		role = 'user';
-		if (user._id.toString() === "65af9e83bf2db94e4cf483be") {
+		if (user.isAdmin) {
 			role = 'admin';
 		}
 		return response(false, resMessage.loginSuccess, resMessage.loginSuccess, {
