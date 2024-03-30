@@ -196,10 +196,6 @@ exports.get = async (req) => {
 
 exports.getPaid = async (req) => {
     try {
-        // Check if the request is made by an admin user
-        if (!req.user || req.user.isAdmin !== true) {
-            throw new Error('Unauthorized access. Admin privileges required.');
-        }
         let meta = {};
         const pageNumber = parseInt(req.query.pageNumber);
         if (isNaN(pageNumber) || pageNumber < 1) {
@@ -213,18 +209,20 @@ exports.getPaid = async (req) => {
         let result = {};
         let matchCondition = {
             $and: [
-                { status: 'P' } // Filter orders with status 'P' (paid)
+                { status: 'P' } // Filter orders with status 'PF' (payment failed)
             ]
         };
-
-        // Ensure the request is from a vendor and fetch vendor ID from the token
-        if (!req.vendor || !req.vendor._id) {
-            throw new Error('Vendor information not found in token');
+        console.log(req.isVendor)
+        console.log(req.isAdmin)
+        // Ensure the request is from a vendor or admin and fetch vendor ID from the token
+        if (!req.isVendor && !req.isAdmin) {
+            return response(true, 'User unauthorised to perform this action','',null,403);
         }
 
-        // Add condition to filter orders by the vendor ID
-        matchCondition.$and.push({ vendors: req.vendor._id });
-
+        if(req.isVendor) {
+            // Add condition to filter orders by the vendor ID
+            matchCondition.$and.push({ vendors: req.vendor._id });
+        }
         if (searchValue && searchValue.trim() !== "") {
             matchCondition['$and'].push({
                 $or: [
@@ -247,23 +245,22 @@ exports.getPaid = async (req) => {
         vendors = vendors.reduce((obj, item) => (obj[item._id] = item, obj), {});
 
         // Fetch orders based on the defined conditions
-        
         result = await makeMongoDbService.getDocumentByCustomAggregation([
             { $match: matchCondition },
             { $sort: sortCriteria },
             { $skip: skip },
             { $limit: pageSize },
         ]);
-        
-       
-
-
+        console.log(result)
         // Get total order count
         orderCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
 
         result = result.map((order) => {
             const filteredOrder = {...order};
-            const filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id);
+            let filteredProducts = order.accounting.cartAccountingList;
+            if(req.isVendor){
+                filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id);
+            }
             let totalPrice = 0;
             for(let product of filteredProducts){
                 totalPrice += product.totalPrice;
@@ -312,7 +309,7 @@ exports.getPaid = async (req) => {
         return response(false, null, resMessage.success, {
             result,
             meta,
-            userDetails: req.user // Include vendor details as well
+            userDetails: req.isVendor ? req.vendor : req.user // Include vendor details as well
         }, 200);
     } catch (error) {
         // Handle errors
@@ -336,18 +333,20 @@ exports.getShipped = async (req) =>{
         let result = {};
         let matchCondition = {
             $and: [
-                { status: 'S' } // Filter orders with status 'P' (paid)
+                { status: 'S' } // Filter orders with status 'PF' (payment failed)
             ]
         };
-
-        // Ensure the request is from a vendor and fetch vendor ID from the token
-        if (!req.vendor || !req.vendor._id) {
-            throw new Error('Vendor information not found in token');
+        console.log(req.isVendor)
+        console.log(req.isAdmin)
+        // Ensure the request is from a vendor or admin and fetch vendor ID from the token
+        if (!req.isVendor && !req.isAdmin) {
+            return response(true, 'User unauthorised to perform this action','',null,403);
         }
 
-        // Add condition to filter orders by the vendor ID
-        matchCondition.$and.push({ vendors: req.vendor._id });
-
+        if(req.isVendor) {
+            // Add condition to filter orders by the vendor ID
+            matchCondition.$and.push({ vendors: req.vendor._id });
+        }
         if (searchValue && searchValue.trim() !== "") {
             matchCondition['$and'].push({
                 $or: [
@@ -376,13 +375,16 @@ exports.getShipped = async (req) =>{
             { $skip: skip },
             { $limit: pageSize },
         ]);
-        
+        console.log(result)
         // Get total order count
         orderCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
 
         result = result.map((order) => {
             const filteredOrder = {...order};
-            const filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id);
+            let filteredProducts = order.accounting.cartAccountingList;
+            if(req.isVendor){
+                filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id);
+            }
             let totalPrice = 0;
             for(let product of filteredProducts){
                 totalPrice += product.totalPrice;
@@ -431,7 +433,7 @@ exports.getShipped = async (req) =>{
         return response(false, null, resMessage.success, {
             result,
             meta,
-            userDetails: req.user // Include vendor details as well
+            userDetails: req.isVendor ? req.vendor : req.user // Include vendor details as well
         }, 200);
     } catch (error) {
         // Handle errors
@@ -458,18 +460,20 @@ exports.getCancel = async (req) => {
         let result = {};
         let matchCondition = {
             $and: [
-                { status: 'C' } // Filter orders with status 'P' (paid)
+                { status: 'C' } // Filter orders with status 'PF' (payment failed)
             ]
         };
-
-        // Ensure the request is from a vendor and fetch vendor ID from the token
-        if (!req.vendor || !req.vendor._id) {
-            throw new Error('Vendor information not found in token');
+        console.log(req.isVendor)
+        console.log(req.isAdmin)
+        // Ensure the request is from a vendor or admin and fetch vendor ID from the token
+        if (!req.isVendor && !req.isAdmin) {
+            return response(true, 'User unauthorised to perform this action','',null,403);
         }
 
-        // Add condition to filter orders by the vendor ID
-        matchCondition.$and.push({ vendors: req.vendor._id });
-
+        if(req.isVendor) {
+            // Add condition to filter orders by the vendor ID
+            matchCondition.$and.push({ vendors: req.vendor._id });
+        }
         if (searchValue && searchValue.trim() !== "") {
             matchCondition['$and'].push({
                 $or: [
@@ -498,13 +502,16 @@ exports.getCancel = async (req) => {
             { $skip: skip },
             { $limit: pageSize },
         ]);
-        
+        console.log(result)
         // Get total order count
         orderCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
 
         result = result.map((order) => {
             const filteredOrder = {...order};
-            const filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id);
+            let filteredProducts = order.accounting.cartAccountingList;
+            if(req.isVendor){
+                filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id);
+            }
             let totalPrice = 0;
             for(let product of filteredProducts){
                 totalPrice += product.totalPrice;
@@ -553,7 +560,7 @@ exports.getCancel = async (req) => {
         return response(false, null, resMessage.success, {
             result,
             meta,
-            userDetails: req.user // Include vendor details as well
+            userDetails: req.isVendor ? req.vendor : req.user // Include vendor details as well
         }, 200);
     } catch (error) {
         // Handle errors

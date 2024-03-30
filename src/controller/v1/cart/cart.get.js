@@ -1,5 +1,6 @@
 const { Cart } = require("../../../models/cart.model");
 const { Vendor } = require("../../../models/vendor.model");
+const { Category } = require("../../../models/category.model"); // Import the Category model
 const makeMongoDbService = require("../../../services/mongoDbService")({
 	model: Cart,
 });
@@ -28,14 +29,21 @@ exports.get = async (req) => {
 			if (!vendor || vendor.status == "D") {
 				vendor = {commission: 0};
 			}
+
+			// Fetch category details
+			const category = await Category.findById(product.category);
+			const categoryName = category ? category.name : "Unknown"; // Use "Unknown" if category is not found
+
 			cartItems.push({
 				...product._doc,
 				quantity,
 				commission: ((product.price*quantity*vendor.commission)/100),
 				finalPrice: (product.price + ((product.price*vendor.commission)/100))*quantity,
-				vendor: (!vendor || vendor.status == "D") ? {} : vendor
+				vendor: (!vendor || vendor.status == "D") ? {} : vendor,
+				category: categoryName // Include category name in the cart item
 			});
 		}
+		
 		finalResult = {
 			id: result.id,
 			user: result.user,

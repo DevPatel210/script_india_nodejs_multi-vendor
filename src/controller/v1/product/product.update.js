@@ -28,6 +28,12 @@ exports.Update = async (req) => {
       return response(true, resMessage.notFound, null,[],404);
     }
     const productData = req.body; // update product payload
+
+    if (typeof productData.bean === 'string') {
+      productData.bean = productData.bean.split(',');
+    }
+
+    
     if(typeof productData.image == 'string'){
       delete productData.image;
     }
