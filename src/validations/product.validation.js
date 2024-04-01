@@ -58,6 +58,7 @@ module.exports = {
   getAllProducts: [
     query("pageNumber", "pageNumber parameter should be number").default(1).toInt(),
   ],
+
   
   deleteProduct: [
     body('product_id', "product_id can not be empty").notEmpty().isString()

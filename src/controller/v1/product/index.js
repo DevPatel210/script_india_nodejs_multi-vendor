@@ -24,6 +24,7 @@ exports.findAll = (req, res) => {
   handleResponse(productGet.findAll(req), res);
 };
 
+
 exports.findById = (req, res) => {
   handleResponse(productGet.findById(req), res);
 };

@@ -63,6 +63,47 @@ exports.findAll = async (req) => {
 				},
 			];
 		}
+		//filter base on Origins
+		if (req.query.origins) {
+			if (!matchCondition.$and) {
+				matchCondition.$and = [{
+					origins: req.query.origins
+				}]
+			} else {
+				matchCondition.$and.push({
+					origins: req.query.origins
+				});
+			}
+		}
+
+		//filter base on missions
+		if (req.query.missions) {
+			if (!matchCondition.$and) {
+				matchCondition.$and = [{
+					missions: req.query.missions
+				}]
+			} else {
+				matchCondition.$and.push({
+					missions: req.query.missions
+				});
+			}
+		}
+
+		//filter base on roast
+		if (req.query.roast) {
+			if (!matchCondition.$and) {
+				matchCondition.$and = [{
+					roast: req.query.roast
+				}]
+			} else {
+				matchCondition.$and.push({
+					roast: req.query.roast
+				});
+			}
+		}
+
+
+
 
 		if (req.query.filterBy=='A' || req.query.filterBy=='P') {
 			if (!matchCondition.$and) {
@@ -214,6 +255,8 @@ exports.findAll = async (req) => {
 		return response(true, null, error.message, error.stack,500);
 	}
 };
+
+
 
 exports.findById = async (req) => {
 	try {
