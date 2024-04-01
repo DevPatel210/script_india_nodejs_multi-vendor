@@ -259,7 +259,7 @@ exports.getPaid = async (req) => {
             const filteredOrder = {...order};
             let filteredProducts = order.accounting.cartAccountingList;
             if(req.isVendor){
-                filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id);
+                filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id.toString());
             }
             let totalPrice = 0;
             for(let product of filteredProducts){
@@ -383,7 +383,7 @@ exports.getShipped = async (req) =>{
             const filteredOrder = {...order};
             let filteredProducts = order.accounting.cartAccountingList;
             if(req.isVendor){
-                filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id);
+                filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id.toString());
             }
             let totalPrice = 0;
             for(let product of filteredProducts){
@@ -510,7 +510,7 @@ exports.getCancel = async (req) => {
             const filteredOrder = {...order};
             let filteredProducts = order.accounting.cartAccountingList;
             if(req.isVendor){
-                filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id);
+                filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id.toString());
             }
             let totalPrice = 0;
             for(let product of filteredProducts){
@@ -634,7 +634,7 @@ exports.getPaymentFailed = async (req) => {
             const filteredOrder = {...order};
             let filteredProducts = order.accounting.cartAccountingList;
             if(req.isVendor){
-                filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id);
+                filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id.toString());
             }
             let totalPrice = 0;
             for(let product of filteredProducts){
@@ -728,16 +728,10 @@ exports.getByDate = async (req) => {
 		});
 		vendors = vendors.reduce((obj, item) => (obj[item._id] = item, obj) ,{});
 
-		// if(req.user && req.user.isAdmin === true){
-            result = await makeMongoDbService.getDocumentByCustomAggregation([
-                { $match: matchCondition},
-            ]);
-            orderCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
-
-            meta = {
-                totalCount: orderCount,
-            };
-        // }
+        result = await makeMongoDbService.getDocumentByCustomAggregation([
+            { $match: matchCondition},
+        ]);
+        // orderCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
 
         result = result.map((order) => {
             const filteredOrder = {...order};
@@ -756,9 +750,26 @@ exports.getByDate = async (req) => {
                     vendorDetails: (!vendorDetails) ? {} : vendorDetails
                 }
             });
-            console.log(filteredOrder);
+            // console.log(filteredOrder);
             return filteredOrder     
         })
+        
+        // console.log(filteredOrder.accounting.cartAccountingList)
+        if (req.query && req.query.search && req.query.search!='') {
+            console.log(req.query.search);
+            result = result.filter((order)=>{
+                let isPresent = false;
+                order.accounting.cartAccountingList.map((product) => {
+                    if(product.productName.toLowerCase().includes(req.query.search.toLowerCase())){
+                        isPresent = true;
+                    }
+                })
+                return isPresent;
+            });
+        }
+        meta = {
+            totalCount: result.length,
+        };
         
         return response(false, null, resMessage.success, {
             meta,
