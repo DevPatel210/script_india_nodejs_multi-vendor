@@ -41,10 +41,10 @@ const productSchema = new mongoose.Schema({
 		type: Array,
 		required: true,
 	},
-	category: {
-		type: String,
-		required: false,
-	},
+	// category: {
+	// 	type: String,
+	// 	required: false,
+	// },
 	status: {
 		type: String,
 		required: true,
@@ -59,18 +59,18 @@ const productSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
-	// origins:{
-	// 	type: String,
-	// 	required: true,
-	// },
-	// missions:{
-	// 	type: String,
-	// 	required: true,
-	// },
-	// roast:{
-	// 	type: String,
-	// 	required: true,
-	// },
+	origins:{
+		type: String,
+		required: true,
+	},
+	missions:{
+		type: String,
+		required: true,
+	},
+	roast:{
+		type: String,
+		required: true,
+	},
 	bean:{
 		type: [String],
 		required: true,
