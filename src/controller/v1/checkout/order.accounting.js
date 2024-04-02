@@ -69,8 +69,8 @@ exports.accounting = async (req) => {
       if (!vendor || !vendor.commission) {
         vendor = { commission: 0 };
       }
-      cartAccountingItem["category"] =
-        category[newProduct.category.toString()].name;
+      // cartAccountingItem["category"] =
+      //   category[newProduct.category.toString()].name;
       cartAccountingItem["unitCommission"] =
         (cartAccountingItem["unitPrice"] * vendor.commission) / 100;
       cartAccountingItem["finalUnitPrice"] =
