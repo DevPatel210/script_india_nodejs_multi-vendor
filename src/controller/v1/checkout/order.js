@@ -696,6 +696,12 @@ exports.getPaymentFailed = async (req) => {
 exports.getByDate = async (req) => {
 	try {
         let meta = {};
+
+        // Ensure the request is from a vendor or admin and fetch vendor ID from the token
+        if (!req.isVendor && !req.isAdmin) {
+            return response(true, 'User unauthorised to perform this action','',null,403);
+        }
+
         const startDateParts = req.query.startDate.split("-");
         const startDate = new Date(startDateParts[2], startDateParts[1] - 1, startDateParts[0], 18, 30, 0, 0);
 
@@ -718,6 +724,11 @@ exports.getByDate = async (req) => {
             ]
         };
 
+        if(req.isVendor) {
+            // Add condition to filter orders by the vendor ID
+            matchCondition.$and.push({ vendors: req.vendor._id });
+        }
+
         let products = await makeMongoDbServiceProduct.getDocumentByQuery({
 			status: { $ne: 'D'}
 		});
@@ -735,12 +746,17 @@ exports.getByDate = async (req) => {
 
         result = result.map((order) => {
             const filteredOrder = {...order};
+            let filteredProducts = filteredOrder.accounting.cartAccountingList;
+            if(req.isVendor){
+                filteredProducts = order.accounting.cartAccountingList.filter((product) => product.vendorId.toString()==req.vendor._id.toString());
+            }
+
             filteredOrder.vendorNames = filteredOrder.vendorNames ? (filteredOrder.vendorNames.map((name)=> {
                 let arr = name.split(' ');
                 arr = arr.slice(0,arr.length-1);
                 return arr.join(' ');
             })) : [];
-            filteredOrder.accounting.cartAccountingList = order.accounting.cartAccountingList.map((product)=>{
+            filteredOrder.accounting.cartAccountingList = filteredProducts.map((product)=>{
                 // console.log(product);
                 const productDetails = products[product.productId.toString()]
                 const vendorDetails = vendors[product.vendorId.toString()]
@@ -766,6 +782,13 @@ exports.getByDate = async (req) => {
                 })
                 return isPresent;
             });
+
+            result = result.map((order) => {
+                order.accounting.cartAccountingList = order.accounting.cartAccountingList.filter((product) => {
+                    return product.productName.toLowerCase().includes(req.query.search.toLowerCase());
+                })
+                return order;
+            })
         }
         meta = {
             totalCount: result.length,

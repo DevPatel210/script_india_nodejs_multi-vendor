@@ -151,8 +151,8 @@ exports.findAll = async (req) => {
 						},
 					},
 					{ $sort: sortCriteria },
-					{ $skip: skip },
-					{ $limit: pageSize },
+					// { $skip: skip },
+					// { $limit: pageSize },
 				]);
 			productCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
 		}else{
@@ -188,8 +188,8 @@ exports.findAll = async (req) => {
 						},
 					},
 					{ $sort: sortCriteria },
-					{ $skip: skip },
-					{ $limit: pageSize },
+					// { $skip: skip },
+					// { $limit: pageSize },
 				]);
 			productCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
 		}
@@ -231,11 +231,19 @@ exports.findAll = async (req) => {
 				category,
 				canAddReview: reviewedProducts.includes(product._id.toString()),
 				reviews,
-				vendorDetails: (!vendor || vendor.status == "D") ? {} : {email: vendor.email, first_name: vendor.first_name, last_name: vendor.last_name, commission: vendor.commission},
+				vendorDetails: (!vendor || vendor.status == "D") ? {} : {email: vendor.email, first_name: vendor.first_name, last_name: vendor.last_name, commission: vendor.commission, display: vendor.display},
 				commission: ((product.price*vendor.commission)/100),
 				finalPrice: product.price + ((product.price*vendor.commission)/100),
 			}
 		}));
+
+		let displayTrueProducts = productsList.filter((product) => product.vendorDetails.display)
+		let displayFalseProducts = productsList.filter((product) => !product.vendorDetails.display)
+
+		productsList = [...displayTrueProducts, ...displayFalseProducts];
+
+		productsList = productsList.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
+
 		meta = {
 			pageNumber,
 			pageSize,

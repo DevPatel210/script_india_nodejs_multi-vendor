@@ -17,7 +17,7 @@ router.get("/getCancel", validate(rules.getOrderCancel), order.getOrderCancel);
 
 router.get("/getPaymentFailed", isVendor, isAdmin, validate(rules.getOrderPaymentFailed), order.getOrderPaymentFailed);
 
-router.get("/getByDate", validate(rules.getOrdersByDate), order.getOrdersByDate);
+router.get("/getByDate", validate(rules.getOrdersByDate), isVendor, isAdmin, order.getOrdersByDate);
 
 router.post("/update", validate(rules.updateOrder), order.updateOrder);
 
