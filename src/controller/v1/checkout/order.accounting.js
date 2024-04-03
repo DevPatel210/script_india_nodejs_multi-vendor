@@ -76,6 +76,7 @@ exports.accounting = async (req) => {
       cartAccountingItem["finalUnitPrice"] =
         cartAccountingItem["unitPrice"] + cartAccountingItem["unitCommission"];
       cartAccountingItem["quantity"] = productListitem.quantity;
+      cartAccountingItem["bean"] = productListitem.bean;
       cartAccountingItem["totalCommission"] =
         cartAccountingItem["unitCommission"] * cartAccountingItem["quantity"];
       cartAccountingItem["totalPrice"] =
