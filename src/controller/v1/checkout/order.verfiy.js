@@ -62,7 +62,7 @@ exports.verifyOrder = async (req) => {
 		if (paymentIntent.status === "succeeded") {
 			order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
 				{ _id: order_id },
-				{ payment_status : "C", status: 'P', paymentIntent }
+				{ payment_status : "C", status: 'P', paymentId }
 			);
 			const user = await makeMongoDbServiceUser.getDocumentById(order.user_id);
 			const message = getPaymentSuccessfulMessage(order);
