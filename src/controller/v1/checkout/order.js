@@ -28,23 +28,23 @@ exports.get = async (req) => {
     const pageSize = 10;
     const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
     const sortCriteria = { _id: -1 };
-    const searchValue = req.query.search || "";
+    let searchValue = req.query.search || "";
     let orderCount = 0;
     let result = {};
     let matchCondition = {
       $and: [{ status: { $ne: "D" } }],
     };
 
-    if (searchValue && searchValue.trim() !== "") {
-      matchCondition["$and"].push({
-        $or: [
-          { payment_status: { $regex: searchValue, $options: "i" } },
-          { status: { $regex: searchValue, $options: "i" } },
-          { vendorNames: { $regex: searchValue, $options: "i" } },
-          // { vendors: { $regex: searchValue, $options:"i" } },
-        ],
-      });
-    }
+    // if (searchValue && searchValue.trim() !== "") {
+    //   matchCondition["$and"].push({
+    //     $or: [
+    //       { payment_status: { $regex: searchValue, $options: "i" } },
+    //       { status: { $regex: searchValue, $options: "i" } },
+    //       { vendorNames: { $regex: searchValue, $options: "i" } },
+    //       { vendors: { $regex: searchValue, $options:"i" } },
+    //     ],
+    //   });
+    // }
 
     let products = await makeMongoDbServiceProduct.getDocumentByQuery({
       status: { $ne: "D" },
@@ -73,8 +73,8 @@ exports.get = async (req) => {
       result = await makeMongoDbService.getDocumentByCustomAggregation([
         { $match: matchCondition },
         { $sort: sortCriteria },
-        { $skip: skip },
-        { $limit: pageSize },
+        // { $skip: skip },
+        // { $limit: pageSize },
       ]);
       orderCount = await makeMongoDbService.getCountDocumentByQuery(
         matchCondition
@@ -109,8 +109,8 @@ exports.get = async (req) => {
       result = await makeMongoDbService.getDocumentByCustomAggregation([
         { $match: matchCondition },
         { $sort: sortCriteria },
-        { $skip: skip },
-        { $limit: pageSize },
+        // { $skip: skip },
+        // { $limit: pageSize },
       ]);
       orderCount = await makeMongoDbService.getCountDocumentByQuery(
         matchCondition
@@ -168,8 +168,8 @@ exports.get = async (req) => {
           $match: matchCondition,
         },
         { $sort: sortCriteria },
-        { $skip: skip },
-        { $limit: pageSize },
+        // { $skip: skip },
+        // { $limit: pageSize },
       ]);
       orderCount = await makeMongoDbService.getCountDocumentByQuery(
         matchCondition
@@ -190,22 +190,68 @@ exports.get = async (req) => {
 
     result = result.map((order) => {
       const filteredOrder = { ...order };
+      const userDetails = users[order.user_id.toString()]; // Fetch userDetails based on user_id
       filteredOrder.accounting.cartAccountingList =
         order.accounting.cartAccountingList.map((product) => {
           // console.log(product);
           const productDetails = products[product.productId.toString()];
           const vendorDetails = vendors[product.vendorId.toString()];
-          const userDetails = users[order.user_id.toString()]; // Fetch userDetails based on user_id
 
           return {
             ...product,
             productDetails: !productDetails ? {} : productDetails,
             vendorDetails: !vendorDetails ? {} : vendorDetails,
-            userDetails: !userDetails ? {} : userDetails,
-          };
-        });
+        };
+      });
+      filteredOrder.userDetails = !userDetails ? {} : userDetails;
       return filteredOrder;
     });
+
+    if (searchValue && searchValue.trim() !== "") {
+        searchValue = searchValue.toString().toLowerCase();
+        console.log(searchValue);
+        result = result.filter((order) => {
+            if(searchValue==order._id.toString() || searchValue==order.payment_status || searchValue==order.status){
+                return true;
+            }
+
+            if(order.userDetails.first_name && order.userDetails.last_name && (order.userDetails.first_name+' '+order.userDetails.last_name).toLowerCase().includes(searchValue)){
+                return true;
+            }
+
+            if(order.userDetails.email && order.userDetails.email.toLowerCase().includes(searchValue)){
+                return true;
+            }
+
+            let isTrue = false;
+            for(let vendor of order.vendorNames){
+                // console.log({vendor})
+                // console.log()
+                if(vendor.toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            isTrue = false;
+            for(let product of order.accounting.cartAccountingList) {
+                if(product.productName.toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            return false;
+        })
+    }
+
+    meta.totalCount = result.length;
+    meta.nextPage = parseInt(result.length) / parseInt(pageSize) <= parseInt(pageNumber) ? false : true;
+    meta.totalPages = Math.ceil(parseInt(result.length) / parseInt(pageSize));
+
+    result = result.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
 
     return response(
       false,
@@ -219,6 +265,7 @@ exports.get = async (req) => {
       200
     );
   } catch (error) {
+    console.log(error);
     throw response(true, null, error.message, error.stack, 500);
   }
 };
@@ -233,7 +280,7 @@ exports.getPaid = async (req) => {
     const pageSize = 10;
     const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
     const sortCriteria = { _id: -1 };
-    const searchValue = req.query.search || "";
+    let searchValue = req.query.search || "";
     let orderCount = 0;
     let result = {};
     let matchCondition = {
@@ -258,15 +305,15 @@ exports.getPaid = async (req) => {
       // Add condition to filter orders by the vendor ID
       matchCondition.$and.push({ vendors: req.vendor._id });
     }
-    if (searchValue && searchValue.trim() !== "") {
-      matchCondition["$and"].push({
-        $or: [
-          { payment_status: { $regex: searchValue, $options: "i" } },
-          { status: { $regex: searchValue, $options: "i" } },
-          { vendorNames: { $regex: searchValue, $options: "i" } },
-        ],
-      });
-    }
+    // if (searchValue && searchValue.trim() !== "") {
+    //   matchCondition["$and"].push({
+    //     $or: [
+    //       { payment_status: { $regex: searchValue, $options: "i" } },
+    //       { status: { $regex: searchValue, $options: "i" } },
+    //       { vendorNames: { $regex: searchValue, $options: "i" } },
+    //     ],
+    //   });
+    // }
 
     // Fetch products and vendors for further processing
     let products = await makeMongoDbServiceProduct.getDocumentByQuery({
@@ -286,8 +333,8 @@ exports.getPaid = async (req) => {
     result = await makeMongoDbService.getDocumentByCustomAggregation([
       { $match: matchCondition },
       { $sort: sortCriteria },
-      { $skip: skip },
-      { $limit: pageSize },
+    //   { $skip: skip },
+    //   { $limit: pageSize },
     ]);
     console.log(result);
     // Get total order count
@@ -358,6 +405,63 @@ exports.getPaid = async (req) => {
       })
     );
 
+    if (searchValue && searchValue.trim() !== "") {
+        searchValue = searchValue.toString().toLowerCase();
+        console.log(searchValue);
+        result = result.filter((order) => {
+            if(searchValue==order._id.toString() || searchValue==order.payment_status || searchValue==order.status){
+                return true;
+            }
+
+            if(order.userDetails.first_name && order.userDetails.last_name && (order.userDetails.first_name+' '+order.userDetails.last_name).toLowerCase().includes(searchValue)){
+                return true;
+            }
+
+            if(order.userDetails.email && order.userDetails.email.toLowerCase().includes(searchValue)){
+                return true;
+            }
+
+            let isTrue = false;
+            for(let vendor of order.vendorNames){
+                // console.log({vendor})
+                // console.log()
+                if(vendor.toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+            
+            isTrue = false;
+            for(let vendor of order.vendors){
+                console.log(vendor)
+                if(vendor.toString().toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            isTrue = false;
+            for(let product of order.accounting.cartAccountingList) {
+                if(product.productName.toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            return false;
+        })
+    }
+
+    meta.totalCount = result.length;
+    meta.nextPage = parseInt(result.length) / parseInt(pageSize) <= parseInt(pageNumber) ? false : true;
+    meta.totalPages = Math.ceil(parseInt(result.length) / parseInt(pageSize));
+
+    result = result.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
+
+
     // Return response with orders, meta data, and user details
     return response(
       false,
@@ -372,6 +476,7 @@ exports.getPaid = async (req) => {
     );
   } catch (error) {
     // Handle errors
+    console.log(error)
     throw response(true, null, error.message, error.stack, 500);
   }
 };
@@ -386,7 +491,7 @@ exports.getShipped = async (req) => {
     const pageSize = 10;
     const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
     const sortCriteria = { _id: -1 };
-    const searchValue = req.query.search || "";
+    let searchValue = req.query.search || "";
     let orderCount = 0;
     let result = {};
     let matchCondition = {
@@ -411,15 +516,15 @@ exports.getShipped = async (req) => {
       // Add condition to filter orders by the vendor ID
       matchCondition.$and.push({ vendors: req.vendor._id });
     }
-    if (searchValue && searchValue.trim() !== "") {
-      matchCondition["$and"].push({
-        $or: [
-          { payment_status: { $regex: searchValue, $options: "i" } },
-          { status: { $regex: searchValue, $options: "i" } },
-          { vendorNames: { $regex: searchValue, $options: "i" } },
-        ],
-      });
-    }
+    // if (searchValue && searchValue.trim() !== "") {
+    //   matchCondition["$and"].push({
+    //     $or: [
+    //       { payment_status: { $regex: searchValue, $options: "i" } },
+    //       { status: { $regex: searchValue, $options: "i" } },
+    //       { vendorNames: { $regex: searchValue, $options: "i" } },
+    //     ],
+    //   });
+    // }
 
     // Fetch products and vendors for further processing
     let products = await makeMongoDbServiceProduct.getDocumentByQuery({
@@ -439,8 +544,8 @@ exports.getShipped = async (req) => {
     result = await makeMongoDbService.getDocumentByCustomAggregation([
       { $match: matchCondition },
       { $sort: sortCriteria },
-      { $skip: skip },
-      { $limit: pageSize },
+    //   { $skip: skip },
+    //   { $limit: pageSize },
     ]);
     console.log(result);
     // Get total order count
@@ -509,6 +614,61 @@ exports.getShipped = async (req) => {
         return filteredOrder;
       })
     );
+
+    if (searchValue && searchValue.trim() !== "") {
+        searchValue = searchValue.toString().toLowerCase();
+        console.log(searchValue);
+        result = result.filter((order) => {
+            if(searchValue==order._id.toString() || searchValue==order.payment_status || searchValue==order.status){
+                return true;
+            }
+
+            if(order.userDetails.first_name && order.userDetails.last_name && (order.userDetails.first_name+' '+order.userDetails.last_name).toLowerCase().includes(searchValue)){
+                return true;
+            }
+
+            if(order.userDetails.email && order.userDetails.email.toLowerCase().includes(searchValue)){
+                return true;
+            }
+
+            let isTrue = false;
+            for(let vendor of order.vendorNames){
+                // console.log({vendor})
+                // console.log()
+                if(vendor.toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            isTrue = false;
+            for(let vendor of order.vendors){
+                if(vendor.toString().toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            isTrue = false;
+            for(let product of order.accounting.cartAccountingList) {
+                if(product.productName.toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            return false;
+        })
+    }
+
+    meta.totalCount = result.length;
+    meta.nextPage = parseInt(result.length) / parseInt(pageSize) <= parseInt(pageNumber) ? false : true;
+    meta.totalPages = Math.ceil(parseInt(result.length) / parseInt(pageSize));
+
+    result = result.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
 
     // Return response with orders, meta data, and user details
     return response(
@@ -538,7 +698,7 @@ exports.getCancel = async (req) => {
     const pageSize = 10;
     const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
     const sortCriteria = { _id: -1 };
-    const searchValue = req.query.search || "";
+    let searchValue = req.query.search || "";
     let orderCount = 0;
     let result = {};
     let matchCondition = {
@@ -563,15 +723,15 @@ exports.getCancel = async (req) => {
       // Add condition to filter orders by the vendor ID
       matchCondition.$and.push({ vendors: req.vendor._id });
     }
-    if (searchValue && searchValue.trim() !== "") {
-      matchCondition["$and"].push({
-        $or: [
-          { payment_status: { $regex: searchValue, $options: "i" } },
-          { status: { $regex: searchValue, $options: "i" } },
-          { vendorNames: { $regex: searchValue, $options: "i" } },
-        ],
-      });
-    }
+    // if (searchValue && searchValue.trim() !== "") {
+    //   matchCondition["$and"].push({
+    //     $or: [
+    //       { payment_status: { $regex: searchValue, $options: "i" } },
+    //       { status: { $regex: searchValue, $options: "i" } },
+    //       { vendorNames: { $regex: searchValue, $options: "i" } },
+    //     ],
+    //   });
+    // }
 
     // Fetch products and vendors for further processing
     let products = await makeMongoDbServiceProduct.getDocumentByQuery({
@@ -591,8 +751,8 @@ exports.getCancel = async (req) => {
     result = await makeMongoDbService.getDocumentByCustomAggregation([
       { $match: matchCondition },
       { $sort: sortCriteria },
-      { $skip: skip },
-      { $limit: pageSize },
+    //   { $skip: skip },
+    //   { $limit: pageSize },
     ]);
     console.log(result);
     // Get total order count
@@ -661,6 +821,62 @@ exports.getCancel = async (req) => {
         return filteredOrder;
       })
     );
+
+    if (searchValue && searchValue.trim() !== "") {
+        searchValue = searchValue.toString().toLowerCase();
+        console.log(searchValue);
+        result = result.filter((order) => {
+            if(searchValue==order._id.toString() || searchValue==order.payment_status || searchValue==order.status){
+                return true;
+            }
+
+            if(order.userDetails.first_name && order.userDetails.last_name && (order.userDetails.first_name+' '+order.userDetails.last_name).toLowerCase().includes(searchValue)){
+                return true;
+            }
+
+            if(order.userDetails.email && order.userDetails.email.toLowerCase().includes(searchValue)){
+                return true;
+            }
+
+            let isTrue = false;
+            for(let vendor of order.vendorNames){
+                // console.log({vendor})
+                // console.log()
+                if(vendor.toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            isTrue = false;
+            for(let vendor of order.vendors){
+                if(vendor.toString().toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            isTrue = false;
+            for(let product of order.accounting.cartAccountingList) {
+                if(product.productName.toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            return false;
+        })
+    }
+
+    meta.totalCount = result.length;
+    meta.nextPage = parseInt(result.length) / parseInt(pageSize) <= parseInt(pageNumber) ? false : true;
+    meta.totalPages = Math.ceil(parseInt(result.length) / parseInt(pageSize));
+
+    result = result.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
+
 
     // Return response with orders, meta data, and user details
     return response(
@@ -690,7 +906,7 @@ exports.getPaymentFailed = async (req) => {
     const pageSize = 10;
     const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
     const sortCriteria = { _id: -1 };
-    const searchValue = req.query.search || "";
+    let searchValue = req.query.search || "";
     let orderCount = 0;
     let result = {};
     let matchCondition = {
@@ -715,15 +931,15 @@ exports.getPaymentFailed = async (req) => {
       // Add condition to filter orders by the vendor ID
       matchCondition.$and.push({ vendors: req.vendor._id });
     }
-    if (searchValue && searchValue.trim() !== "") {
-      matchCondition["$and"].push({
-        $or: [
-          { payment_status: { $regex: searchValue, $options: "i" } },
-          { status: { $regex: searchValue, $options: "i" } },
-          { vendorNames: { $regex: searchValue, $options: "i" } },
-        ],
-      });
-    }
+    // if (searchValue && searchValue.trim() !== "") {
+    //   matchCondition["$and"].push({
+    //     $or: [
+    //       { payment_status: { $regex: searchValue, $options: "i" } },
+    //       { status: { $regex: searchValue, $options: "i" } },
+    //       { vendorNames: { $regex: searchValue, $options: "i" } },
+    //     ],
+    //   });
+    // }
 
     // Fetch products and vendors for further processing
     let products = await makeMongoDbServiceProduct.getDocumentByQuery({
@@ -743,8 +959,8 @@ exports.getPaymentFailed = async (req) => {
     result = await makeMongoDbService.getDocumentByCustomAggregation([
       { $match: matchCondition },
       { $sort: sortCriteria },
-      { $skip: skip },
-      { $limit: pageSize },
+    //   { $skip: skip },
+    //   { $limit: pageSize },
     ]);
     console.log(result);
     // Get total order count
@@ -813,6 +1029,60 @@ exports.getPaymentFailed = async (req) => {
         return filteredOrder;
       })
     );
+
+    if (searchValue && searchValue.trim() !== "") {
+        searchValue = searchValue.toString().toLowerCase();
+        console.log(searchValue);
+        result = result.filter((order) => {
+            if(searchValue==order._id.toString() || searchValue==order.payment_status || searchValue==order.status){
+                return true;
+            }
+
+            if(order.userDetails.first_name && order.userDetails.last_name && (order.userDetails.first_name+' '+order.userDetails.last_name).toLowerCase().includes(searchValue)){
+                return true;
+            }
+
+            if(order.userDetails.email && order.userDetails.email.toLowerCase().includes(searchValue)){
+                return true;
+            }
+
+            let isTrue = false;
+            for(let vendor of order.vendorNames){
+                // console.log({vendor})
+                // console.log()
+                if(vendor.toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            isTrue = false;
+            for(let vendor of order.vendors){
+                if(vendor.toString().toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            isTrue = false;
+            for(let product of order.accounting.cartAccountingList) {
+                if(product.productName.toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            return false;
+        })
+    }
+    meta.totalCount = result.length;
+    meta.nextPage = parseInt(result.length) / parseInt(pageSize) <= parseInt(pageNumber) ? false : true;
+    meta.totalPages = Math.ceil(parseInt(result.length) / parseInt(pageSize));
+
+    result = result.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
 
     // Return response with orders, meta data, and user details
     return response(
@@ -908,7 +1178,7 @@ exports.getByDate = async (req) => {
     ]);
     // orderCount = await makeMongoDbService.getCountDocumentByQuery(matchCondition);
 
-    result = result.map((order) => {
+    result = await Promise.all(result.map(async (order) => {
       const filteredOrder = { ...order };
       let filteredProducts = filteredOrder.accounting.cartAccountingList;
       if (req.isVendor) {
@@ -937,36 +1207,96 @@ exports.getByDate = async (req) => {
         }
       );
       // console.log(filteredOrder);
+      // Fetch user details by user_id
+      const userDetails = await makeMongoDbServiceUser.getDocumentById(
+          order.user_id
+      );
+      filteredOrder.userDetails = userDetails || {}; 
       return filteredOrder;
-    });
+    }));
 
     // console.log(filteredOrder.accounting.cartAccountingList)
-    if (req.query && req.query.search && req.query.search != "") {
-      console.log(req.query.search);
-      result = result.filter((order) => {
-        let isPresent = false;
-        order.accounting.cartAccountingList.map((product) => {
-          if (
-            product.productName
-              .toLowerCase()
-              .includes(req.query.search.toLowerCase())
-          ) {
-            isPresent = true;
-          }
-        });
-        return isPresent;
-      });
+    // if (req.query && req.query.search && req.query.search != "") {
+    //   console.log(req.query.search);
+    //   result = result.filter((order) => {
+    //     let isPresent = false;
+    //     order.accounting.cartAccountingList.map((product) => {
+    //       if (
+    //         product.productName
+    //           .toLowerCase()
+    //           .includes(req.query.search.toLowerCase())
+    //       ) {
+    //         isPresent = true;
+    //       }
+    //     });
+    //     return isPresent;
+    //   });
 
-      result = result.map((order) => {
-        order.accounting.cartAccountingList =
-          order.accounting.cartAccountingList.filter((product) => {
-            return product.productName
-              .toLowerCase()
-              .includes(req.query.search.toLowerCase());
-          });
-        return order;
-      });
+    //   result = result.map((order) => {
+    //     order.accounting.cartAccountingList =
+    //       order.accounting.cartAccountingList.filter((product) => {
+    //         return product.productName
+    //           .toLowerCase()
+    //           .includes(req.query.search.toLowerCase());
+    //       });
+    //     return order;
+    //   });
+    // }
+    if (req.query && req.query.search && req.query.search != "") {
+        let searchValue = req.query.search.toString().toLowerCase();
+        console.log(searchValue);
+        result = result.filter((order) => {
+            if(searchValue==order._id.toString() || searchValue==order.payment_status || searchValue==order.status){
+                return true;
+            }
+
+            if(order.userDetails.first_name && order.userDetails.last_name && (order.userDetails.first_name+' '+order.userDetails.last_name).toLowerCase().includes(searchValue)){
+                return true;
+            }
+
+            if(order.userDetails.email && order.userDetails.email.toLowerCase().includes(searchValue)){
+                return true;
+            }
+
+            let isTrue = false;
+            for(let vendor of order.vendorNames){
+                // console.log({vendor})
+                // console.log()
+                if(vendor.toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            isTrue = false;
+            for(let vendor of order.vendors){
+                if(vendor.toString().toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            isTrue = false;
+            for(let product of order.accounting.cartAccountingList) {
+                if(product.productName.toLowerCase().includes(searchValue)){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue) return true;
+
+            return false;
+        })
     }
+
+    // meta.totalCount = result.length;
+    // meta.nextPage = parseInt(result.length) / parseInt(pageSize) <= parseInt(pageNumber) ? false : true;
+    // meta.totalPages = Math.ceil(parseInt(result.length) / parseInt(pageSize));
+
+    // result = result.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
+
     meta = {
       totalCount: result.length,
     };

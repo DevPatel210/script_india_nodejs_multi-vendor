@@ -42,10 +42,10 @@ const makeMongoDbServiceUser = require("../../../services/mongoDbService")({
 // };
 
 exports.verifyOrder = async (req) => {
+	let order_id = req.body.order_id;
+	let paymentId = req.body.paymentId;
 	try {
 		let order;
-		let paymentId = req.body.paymentId;
-		let order_id = req.body.order_id;
 
 		// Check if order_id is provided and is a valid ObjectId
 		if (!order_id || !mongoose.Types.ObjectId.isValid(order_id)) {
@@ -71,7 +71,7 @@ exports.verifyOrder = async (req) => {
 		} else {
 			order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
 				{ _id: order_id },
-				{ payment_status: "PF", status: "PF" } // Update status to "PF" (Payment Failed)
+				{ payment_status: "PF", status: "PF", paymentId } // Update status to "PF" (Payment Failed)
 			);
 			return response(true, "Order payment failed.", null, order, 400);
 		}
@@ -79,7 +79,7 @@ exports.verifyOrder = async (req) => {
 		// If an error occurs, update the order status to "PF" and throw an error
 		const order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
 			{ _id: order_id },
-			{ payment_status: "PF", status: "PF" } // Update status to "PF" (Payment Failed)
+			{ payment_status: "PF", status: "PF", paymentId } // Update status to "PF" (Payment Failed)
 		);
 		throw response(true, null, error.message, error.stack, 500);
 	}

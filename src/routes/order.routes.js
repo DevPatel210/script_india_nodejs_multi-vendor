@@ -7,13 +7,13 @@ const rules = require("../validations/order.validation");
 const { isVendor, verifyToken, isAdmin } = require("../middleware/auth.mdl");
 
 
-router.get("/", validate(rules.getOrder), order.getOrder);
+router.get("/", validate(rules.getOrder), verifyToken, isAdmin, isVendor, order.getOrder);
 
-router.get("/getPaid", validate(rules.getOrderPaid), order.getOrderPaid);
+router.get("/getPaid", isVendor, isAdmin, validate(rules.getOrderPaid), order.getOrderPaid);
 
-router.get("/getShipped", validate(rules.getOrderShipped), order.getOrderShipped);
+router.get("/getShipped", isVendor, isAdmin, validate(rules.getOrderShipped), order.getOrderShipped);
 
-router.get("/getCancel", validate(rules.getOrderCancel), order.getOrderCancel);
+router.get("/getCancel", isVendor, isAdmin, validate(rules.getOrderCancel), order.getOrderCancel);
 
 router.get("/getPaymentFailed", isVendor, isAdmin, validate(rules.getOrderPaymentFailed), order.getOrderPaymentFailed);
 
