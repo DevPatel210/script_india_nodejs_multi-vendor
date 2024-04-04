@@ -1502,13 +1502,13 @@ exports.cancel = async (req) => {
 
 exports.addTrackingDetails = async (req) => {
   try {
-    if (req.isVendor && req.isAdmin) {
+    if (req.isVendor || req.isAdmin) {
       let isorder = await makeMongoDbService.getDocumentById(req.body.order_id);
       if (!isorder) {
         return response(true, resMessage.orderNotFound, null, [], 404);
       }
       if (
-        !isorder.vendors &&
+        !isorder.vendors ||
         !isorder.isAdmin
           .map((id) => id.toString())
           .includes(req.vendor._id.toString())
