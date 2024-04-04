@@ -1502,7 +1502,7 @@ exports.cancel = async (req) => {
 
 exports.addTrackingDetails = async (req) => {
   try {
-    if (req.isVendor) {
+    if (req.isVendor && req.isAdmin) {
       let isorder = await makeMongoDbService.getDocumentById(req.body.order_id);
       if (!isorder) {
         return response(true, resMessage.orderNotFound, null, [], 404);
