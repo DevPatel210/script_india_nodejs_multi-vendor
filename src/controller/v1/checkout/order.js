@@ -1508,8 +1508,7 @@ exports.addTrackingDetails = async (req) => {
         return response(true, resMessage.orderNotFound, null, [], 404);
       }
       if (
-        !isorder.vendors ||
-        !isorder.isAdmin
+        !isorder.vendors
           .map((id) => id.toString())
           .includes(req.vendor._id.toString())
       ) {
