@@ -73,3 +73,37 @@ exports.add = async (req) => {
     throw response(true, null, error.message, error.stack, 500);
   }
 };
+
+// Function to update quantity in the cart
+exports.updateQuantity = async (req) => {
+  try {
+    const { product_id, quantity, bean } = req.body;
+    const { _id } = req.user;
+
+    // Find the cart for the current user
+    let cart = await Cart.findOne({ user: _id });
+
+    if (cart) {
+      // Find the item in the cart
+      const existingCartItem = cart.cartItems.find(
+        (item) => item.product.toString() === product_id && item.bean === bean
+      );
+
+      if (existingCartItem) {
+        // Update the quantity of the item
+        existingCartItem.quantity = quantity;
+
+        // Save the updated cart
+        cart = await cart.save();
+
+        return response(false, resMessage.success, null, cart, 200);
+      } else {
+        throw new Error("Item not found in the cart.");
+      }
+    } else {
+      throw new Error("Cart not found for the user.");
+    }
+  } catch (error) {
+    throw response(true, null, error.message, error.stack, 500);
+  }
+};

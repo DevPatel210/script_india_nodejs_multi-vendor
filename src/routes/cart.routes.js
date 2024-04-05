@@ -8,9 +8,19 @@ const order = require("../controller/v1/checkout");
 
 router.post("/add", validate(rules.add), cart.add);
 
+router.post(
+  "/updateQuantity",
+  validate(rules.updateQuantity),
+  cart.updateQuantity
+);
+
 router.post("/clear", cart.clear);
 
-router.post("/removeProduct", validate(rules.removeProductFromCart), cart.removeProductFromCart);
+router.post(
+  "/removeProduct",
+  validate(rules.removeProductFromCart),
+  cart.removeProductFromCart
+);
 
 router.get("/get", cart.get);
 
