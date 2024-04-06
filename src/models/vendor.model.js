@@ -36,7 +36,7 @@ const vendorSchema = mongoose.Schema({
     type: Number,
     // min: 1,
     // max: 5,
-    required: true
+    required: true,
   },
   address: {
     type: String,
@@ -46,13 +46,17 @@ const vendorSchema = mongoose.Schema({
     type: String,
   },
   image: {
-		type: Array,
-		required: true,
-	},
+    type: Array,
+    required: true,
+  },
   display: {
     type: Boolean,
     default: false,
-  }
+  },
+  website: {
+    type: String,
+    default: false,
+  },
 });
 
 vendorSchema.method("toJSON", function () {
