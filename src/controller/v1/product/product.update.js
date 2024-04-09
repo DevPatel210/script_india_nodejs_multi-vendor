@@ -82,6 +82,12 @@ exports.approveProduct = async (req) => {
       isProduct.markup_price = req.body.markup_price;
     }
 
+    // Check if total_price is provided in the request
+    if (req.body.total_price !== undefined) {
+      // If provided, add the total_price field to the product object
+      isProduct.total_price = req.body.total_price;
+    }
+
     const updatedProduct = await makeMongoDbService.findOneAndUpdateDocument(
       { _id: req.body.product_id },
       isProduct

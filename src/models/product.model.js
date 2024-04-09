@@ -39,6 +39,9 @@ const productSchema = new mongoose.Schema(
     markup_price: {
       type: Number,
     },
+    total_price: {
+      type: Number,
+    },
     image: {
       type: Array,
       required: true,
