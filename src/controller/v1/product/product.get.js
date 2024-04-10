@@ -261,8 +261,9 @@ exports.findAll = async (req) => {
                   commission: vendor.commission,
                   display: vendor.display,
                 },
-          commission: (product.price * vendor.commission) / 100,
-          finalPrice: product.price + (product.price * vendor.commission) / 100,
+          //commission: (product.price * vendor.commission) / 100,
+          //finalPrice: product.price + (product.price * vendor.commission) / 100,
+          finalPrice: product.total_price, // Set finalPrice equal to total_price
         };
       })
     );
