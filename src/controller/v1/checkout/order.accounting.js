@@ -57,6 +57,7 @@ exports.accounting = async (req) => {
     );
     let cartItems = cartData.cartItems;
     const vendorset = new Set();
+
     for (const productListitem of cartItems) {
       var newProduct = productListitem.product;
       var cartAccountingItem = {};
@@ -77,10 +78,10 @@ exports.accounting = async (req) => {
         cartAccountingItem["unitPrice"] + cartAccountingItem["unitCommission"];
       cartAccountingItem["quantity"] = productListitem.quantity;
       cartAccountingItem["bean"] = productListitem.bean;
-      cartAccountingItem["totalCommission"] =
-        cartAccountingItem["unitCommission"] * cartAccountingItem["quantity"];
+      // cartAccountingItem["totalCommission"] = cartAccountingItem["unitCommission"] * cartAccountingItem["quantity"];
+      //cartAccountingItem["totalPrice"] = cartAccountingItem["finalUnitPrice"] * cartAccountingItem["quantity"];
       cartAccountingItem["totalPrice"] =
-        cartAccountingItem["finalUnitPrice"] * cartAccountingItem["quantity"];
+        cartAccountingItem["unitPrice"] * cartAccountingItem["quantity"];
       cartAccountingList.push(cartAccountingItem);
     }
 
