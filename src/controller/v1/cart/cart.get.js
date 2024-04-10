@@ -41,10 +41,11 @@ exports.get = async (req) => {
         ...product._doc,
         bean,
         quantity,
-        commission: (product.price * quantity * vendor.commission) / 100,
-        finalPrice:
-          (product.price + (product.price * vendor.commission) / 100) *
-          quantity,
+        //commission: (product.price * quantity * vendor.commission) / 100,
+        // finalPrice:
+        //   (product.price + (product.price * vendor.commission) / 100) *
+        //   quantity,
+        finalPrice: product.total_price * quantity, // Set finalPrice equal to total_price
         bean,
         vendor: !vendor || vendor.status == "D" ? {} : vendor,
         category: categoryName, // Include category name in the cart item

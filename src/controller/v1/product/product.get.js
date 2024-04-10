@@ -375,8 +375,9 @@ exports.findById = async (req) => {
         last_name: vendor.last_name,
         commission: vendor.commission,
       },
-      commission: (isProduct.price * vendor.commission) / 100,
-      finalPrice: isProduct.price + (isProduct.price * vendor.commission) / 100,
+      //commission: (isProduct.price * vendor.commission) / 100,
+      //finalPrice: isProduct.price + (isProduct.price * vendor.commission) / 100,
+      finalPrice: product.total_price, // Set finalPrice equal to total_price
     };
     return response(false, null, resMessage.success, isProduct, 200);
   } catch (error) {
