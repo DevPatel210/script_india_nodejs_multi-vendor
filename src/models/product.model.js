@@ -37,7 +37,7 @@ const productSchema = new mongoose.Schema(
     // 	required: true,
     // },
     markup_price: {
-      type: Number,
+      type: String,
     },
     total_price: {
       type: Number,
