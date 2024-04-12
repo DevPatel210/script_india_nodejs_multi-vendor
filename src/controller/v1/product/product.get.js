@@ -370,8 +370,13 @@ exports.findById = async (req) => {
       ["user"]
     );
 
+		let productData = isProduct._doc;
+		if(isProduct._doc.status=='P'){
+			productData = isProduct._doc.oldDetails;
+		}
+
     isProduct = {
-      ...isProduct._doc,
+      ...productData,
       reviews,
       category: category ? category : isProduct.category,
       canAddReview: reviewedProducts.includes(isProduct._id.toString()),
@@ -384,7 +389,7 @@ exports.findById = async (req) => {
       },
       //commission: (isProduct.price * vendor.commission) / 100,
       //finalPrice: isProduct.price + (isProduct.price * vendor.commission) / 100,
-      finalPrice: isProduct.total_price.toFixed(2),
+      finalPrice: isProduct.total_price ? isProduct.total_price.toFixed(2) : 0,
     };
     return response(false, null, resMessage.success, isProduct, 200);
   } catch (error) {
