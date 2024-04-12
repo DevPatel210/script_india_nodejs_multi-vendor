@@ -263,7 +263,7 @@ exports.findAll = async (req) => {
                 },
           //commission: (product.price * vendor.commission) / 100,
           //finalPrice: product.price + (product.price * vendor.commission) / 100,
-          finalPrice: product.total_price, // Set finalPrice equal to total_price
+          finalPrice: product.total_price.toFixed(2), // Set finalPrice equal to total_price with 2 decimal places
         };
       })
     );
@@ -378,7 +378,7 @@ exports.findById = async (req) => {
       },
       //commission: (isProduct.price * vendor.commission) / 100,
       //finalPrice: isProduct.price + (isProduct.price * vendor.commission) / 100,
-      finalPrice: isProduct.total_price,
+      finalPrice: isProduct.total_price.toFixed(2),
     };
     return response(false, null, resMessage.success, isProduct, 200);
   } catch (error) {
