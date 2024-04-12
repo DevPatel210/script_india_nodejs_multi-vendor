@@ -85,6 +85,9 @@ const productSchema = new mongoose.Schema(
       ref: "Vendor",
       required: true,
     },
+    oldDetails: {
+      type: Object,
+    },
     extraAttr: [extraAttrSchema],
   },
   { timestamps: true }

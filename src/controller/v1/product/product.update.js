@@ -39,7 +39,7 @@ exports.Update = async (req) => {
     }
     const updatedProduct = await makeMongoDbService.findOneAndUpdateDocument(
       { _id: req.body.product_id },
-      productData
+      {...productData, oldDetails: isProduct }
     );
 
     if (req.isVendor) {
@@ -87,6 +87,8 @@ exports.approveProduct = async (req) => {
       // If provided, add the total_price field to the product object
       isProduct.total_price = req.body.total_price;
     }
+
+    isProduct.oldDetails = null;
 
     const updatedProduct = await makeMongoDbService.findOneAndUpdateDocument(
       { _id: req.body.product_id },

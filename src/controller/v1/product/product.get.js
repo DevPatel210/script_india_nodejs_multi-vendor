@@ -157,6 +157,7 @@ exports.findAll = async (req) => {
             extraAttr: 1,
             createdAt: 1,
             updatedAt: 1,
+						oldDetails:1
           },
         },
         { $sort: sortCriteria },
@@ -197,6 +198,7 @@ exports.findAll = async (req) => {
             extraAttr: 1,
             createdAt: 1,
             updatedAt: 1,
+						oldDetails: 1
           },
         },
         { $sort: sortCriteria },
@@ -245,9 +247,13 @@ exports.findAll = async (req) => {
         let category = await makeMongoDbServiceCategory.getDocumentById(
           product.category
         );
-
+				
+				let productData = product;
+				if(product.status=='P'){
+					productData = product.oldDetails;
+				}
         return {
-          ...product,
+          ...productData,
           category,
           canAddReview: reviewedProducts.includes(product._id.toString()),
           reviews,
@@ -263,7 +269,7 @@ exports.findAll = async (req) => {
                 },
           //commission: (product.price * vendor.commission) / 100,
           //finalPrice: product.price + (product.price * vendor.commission) / 100,
-          finalPrice: product.total_price.toFixed(2), // Set finalPrice equal to total_price with 2 decimal places
+          finalPrice: product.total_price ? product.total_price.toFixed(2) : 0, // Set finalPrice equal to total_price with 2 decimal places
         };
       })
     );
