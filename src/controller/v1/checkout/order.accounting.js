@@ -28,6 +28,7 @@ const makeMongoDbServiceUser = require("../../../services/mongoDbService")({
 });
 
 exports.accounting = async (req) => {
+  const unitShippingCost = 6;
   try {
     let cartId = req.body.cartId;
     let orderAccounting = {};
@@ -58,6 +59,7 @@ exports.accounting = async (req) => {
     let cartItems = cartData.cartItems;
     const vendorset = new Set();
 
+    let totalItems = 0;
     for (const productListitem of cartItems) {
       var newProduct = productListitem.product;
       var cartAccountingItem = {};
@@ -77,6 +79,7 @@ exports.accounting = async (req) => {
       cartAccountingItem["finalUnitPrice"] =
         cartAccountingItem["unitPrice"] + cartAccountingItem["unitCommission"];
       cartAccountingItem["quantity"] = productListitem.quantity;
+      totalItems += productListitem.quantity;
       cartAccountingItem["bean"] = productListitem.bean;
       // cartAccountingItem["totalCommission"] = cartAccountingItem["unitCommission"] * cartAccountingItem["quantity"];
       //cartAccountingItem["totalPrice"] = cartAccountingItem["finalUnitPrice"] * cartAccountingItem["quantity"];
@@ -85,12 +88,13 @@ exports.accounting = async (req) => {
       cartAccountingList.push(cartAccountingItem);
     }
 
-    let finalTotal = 0;
+    let finalTotal = totalItems*unitShippingCost;
     for (let index = 0; index < cartAccountingList.length; index++) {
       const cartAccountingItem = cartAccountingList[index];
       finalTotal += cartAccountingItem["totalPrice"];
     }
     orderAccounting.finalTotal = parseInt(finalTotal);
+    orderAccounting.shippingCost = totalItems*unitShippingCost;
     orderAccounting.cartAccountingList = cartAccountingList;
     let payload = {
       cart_id: cartId,
@@ -144,12 +148,21 @@ exports.accounting = async (req) => {
       // paymentId,
     });
     await sendEmail(req.user.email, "Order Placed", message, true);
+    const vendorDetails = await makeMongoDbServiceVendor.getDocumentByQuery({ _id: { $in: Array.from(vendorset) }});
+    orderAccounting.cartAccountingList = orderAccounting.cartAccountingList.reduce((group, product) => {
+      let { vendorId } = product;
+      vendorId = vendorId.toString();
+      group[vendorId] = group[vendorId] ?? [];
+      group[vendorId].push(product);
+      return group;
+    }, {});
     return response(
       false,
       resMessage.success,
       null,
       {
         ...orderAccounting,
+        vendorDetails: vendorDetails.reduce((obj, item) => ((obj[item._id] = item), obj), {}),
         order_id: responseData._id.toString(),
         vendorNames: Array.from(vendorset).map(
           (id) => `${vendors[id].first_name} ${vendors[id].last_name}`
@@ -190,6 +203,7 @@ function getOrderPlacedMessage(order) {
 
 		<h4>Shipping Address:</h4> ${order.shippingAddress}
 		<h4>Billing Address:</h4> ${order.billingAddress}
+		<h4>Shipping Cost:</h4> ${order.shippingCost}
 		<h4>Final Price:</h4> $ ${order.finalTotal}
 	`;
 }

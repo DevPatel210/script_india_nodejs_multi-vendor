@@ -18,6 +18,8 @@ const { response, resMessage } = require("../../../helpers/common");
 const { default: mongoose } = require("mongoose");
 const { sendEmail } = require("../../../services/email");
 
+const unitShippingCost=6;
+
 exports.get = async (req) => {
   try {
     let meta = {};
@@ -122,9 +124,13 @@ exports.get = async (req) => {
           (product) => product.vendorId.toString() == req.vendor._id
         );
         let totalPrice = 0;
+        let totalItems = 0;
         for (let product of filteredProducts) {
           totalPrice += product.totalPrice;
+          totalItems += product.quantity;
         }
+
+        totalPrice += totalItems*unitShippingCost
 
         filteredOrder.accounting.cartAccountingList = filteredProducts;
         filteredOrder.vendorNames = filteredOrder.vendorNames
@@ -369,9 +375,12 @@ exports.getPaid = async (req) => {
         );
       }
       let totalPrice = 0;
+      let totalItems = 0;
       for (let product of filteredProducts) {
         totalPrice += product.totalPrice;
+        totalItems += product.quantity;
       }
+      totalPrice += totalItems*unitShippingCost;
 
       filteredOrder.accounting.cartAccountingList = filteredProducts;
       filteredOrder.vendorNames = filteredOrder.vendorNames
@@ -595,9 +604,12 @@ exports.getShipped = async (req) => {
         );
       }
       let totalPrice = 0;
+      let totalItems = 0;
       for (let product of filteredProducts) {
         totalPrice += product.totalPrice;
+        totalItems += product.quantity;
       }
+      totalPrice += totalItems*unitShippingCost
 
       filteredOrder.accounting.cartAccountingList = filteredProducts;
       filteredOrder.vendorNames = filteredOrder.vendorNames
@@ -818,9 +830,12 @@ exports.getCancel = async (req) => {
         );
       }
       let totalPrice = 0;
+      let totalItems = 0;
       for (let product of filteredProducts) {
         totalPrice += product.totalPrice;
+        totalItems += product.quantity;
       }
+      totalPrice += totalItems*unitShippingCost
 
       filteredOrder.accounting.cartAccountingList = filteredProducts;
       filteredOrder.vendorNames = filteredOrder.vendorNames
@@ -1041,9 +1056,12 @@ exports.getPaymentFailed = async (req) => {
         );
       }
       let totalPrice = 0;
+      let totalItems = 0;
       for (let product of filteredProducts) {
         totalPrice += product.totalPrice;
+        totalItems += product.quantity;
       }
+      totalPrice += totalItems*unitShippingCost;
 
       filteredOrder.accounting.cartAccountingList = filteredProducts;
       filteredOrder.vendorNames = filteredOrder.vendorNames
@@ -1549,6 +1567,7 @@ function getAddShippingMessage(order) {
 		<h4>Order id:</h4> ${order._id.toString()}
 		<h4>Shipping Address:</h4> ${order.shippingAddress}
 		<h4>Billing Address:</h4> ${order.billingAddress}
+		<h4>Shipping Cost:</h4> ${order.accounting.shippingCost}
 		<h4>Final Price:</h4> $ ${order.accounting.finalTotal}
 		<h4>Tracking Number:</h4> ${order.trackingDetails.tracking_number}
 		<h4>Tracking Link:</h4> ${order.trackingDetails.tracking_link}
