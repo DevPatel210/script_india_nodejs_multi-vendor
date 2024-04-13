@@ -148,7 +148,8 @@ exports.accounting = async (req) => {
       // paymentId,
     });
     await sendEmail(req.user.email, "Order Placed", message, true);
-    const vendorDetails = await makeMongoDbServiceVendor.getDocumentByQuery({ _id: { $in: Array.from(vendorset) }});
+    let vendorDetails = await makeMongoDbServiceVendor.getDocumentByQuery({ _id: { $in: Array.from(vendorset) }});
+    vendorDetails = vendorDetails.reduce((obj, item) => ((obj[item._id] = item), obj), {})
     orderAccounting.cartAccountingList = orderAccounting.cartAccountingList.reduce((group, product) => {
       let { vendorId } = product;
       vendorId = vendorId.toString();
@@ -156,13 +157,21 @@ exports.accounting = async (req) => {
       group[vendorId].push(product);
       return group;
     }, {});
+    let finalGroupedObject = [];
+    for( let vendorId of Object.keys(orderAccounting.cartAccountingList)) {
+      finalGroupedObject.push({
+        vendorDetails: vendorDetails[vendorId],
+        products: orderAccounting.cartAccountingList[vendorId],
+      })
+    };
+    orderAccounting.cartAccountingList = finalGroupedObject;
     return response(
       false,
       resMessage.success,
       null,
       {
         ...orderAccounting,
-        vendorDetails: vendorDetails.reduce((obj, item) => ((obj[item._id] = item), obj), {}),
+        // vendorDetails: vendorDetails.reduce((obj, item) => ((obj[item._id] = item), obj), {}),
         order_id: responseData._id.toString(),
         vendorNames: Array.from(vendorset).map(
           (id) => `${vendors[id].first_name} ${vendors[id].last_name}`

@@ -21,10 +21,13 @@ exports.create = async (req) => {
       req.body.bean = req.body.bean.split(',');
     }
     console.log('After split:', req.body.bean);
-    
-
-    const newProduct = await makeMongoDbService.createDocument(req.body);
-
+    req.body.total_price = req.body.price;
+    let newProduct = await makeMongoDbService.createDocument(req.body);
+    newProduct.oldDetails = {...newProduct._doc};
+    const updatedProduct = await makeMongoDbService.findOneAndUpdateDocument(
+      { _id: newProduct._id },
+      newProduct
+    );
     const vendorDetails = await makeMongoDbServiceVendor.getSingleDocumentById(req.body.vendor);
     const message = getPendingApprovalMessage(newProduct, vendorDetails);
     await sendEmail('','New Product Approval Pending', message);
@@ -33,7 +36,7 @@ exports.create = async (req) => {
       false,
       resMessage.success,
       null,
-      newProduct,
+      updatedProduct,
       201
     );
   } catch (error) {
