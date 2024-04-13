@@ -12,38 +12,33 @@ const { sendEmail } = require("../../../services/email");
 // Create and Save a new product
 exports.create = async (req) => {
   try {
-    if(!req.body.vendor){
+    if (!req.body.vendor) {
       req.body.vendor = req.vendor._id;
     }
-    
-    console.log('Before split:', req.body.bean);
-    if (req.body.bean && typeof req.body.bean === 'string') {
-      req.body.bean = req.body.bean.split(',');
+
+    console.log("Before split:", req.body.bean);
+    if (req.body.bean && typeof req.body.bean === "string") {
+      req.body.bean = req.body.bean.split(",");
     }
-    console.log('After split:', req.body.bean);
-    
+    console.log("After split:", req.body.bean);
 
     const newProduct = await makeMongoDbService.createDocument(req.body);
 
-    const vendorDetails = await makeMongoDbServiceVendor.getSingleDocumentById(req.body.vendor);
-    const message = getPendingApprovalMessage(newProduct, vendorDetails);
-    await sendEmail('','New Product Approval Pending', message);
-
-    return response(
-      false,
-      resMessage.success,
-      null,
-      newProduct,
-      201
+    const vendorDetails = await makeMongoDbServiceVendor.getSingleDocumentById(
+      req.body.vendor
     );
+    const message = getPendingApprovalMessage(newProduct, vendorDetails);
+    await sendEmail("", "New Product Approval Pending", message);
+
+    return response(false, resMessage.success, null, newProduct, 201);
   } catch (error) {
     console.log(error);
-    throw response(true, null, error.message, error.stack,500);
+    throw response(true, null, error.message, error.stack, 500);
   }
 };
 
-function getPendingApprovalMessage(product, vendor){
-	return `
+function getPendingApprovalMessage(product, vendor) {
+  return `
 		A new product has been added by a vendor and is currently pending your approval.
     <br><br>
     Product Details: <br>
@@ -53,5 +48,5 @@ function getPendingApprovalMessage(product, vendor){
     - Price: $ ${product.price} <br>
     <br><br>
     Please review the product and take necessary action.
-	`
+	`;
 }
