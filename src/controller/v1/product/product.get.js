@@ -157,7 +157,7 @@ exports.findAll = async (req) => {
             extraAttr: 1,
             createdAt: 1,
             updatedAt: 1,
-						oldDetails:1
+            oldDetails: 1,
           },
         },
         { $sort: sortCriteria },
@@ -198,7 +198,7 @@ exports.findAll = async (req) => {
             extraAttr: 1,
             createdAt: 1,
             updatedAt: 1,
-						oldDetails: 1
+            oldDetails: 1,
           },
         },
         { $sort: sortCriteria },
@@ -247,14 +247,14 @@ exports.findAll = async (req) => {
         let category = await makeMongoDbServiceCategory.getDocumentById(
           product.category
         );
-				
-				let productData = product;
-				if(product.status=='P'){
-					productData = product.oldDetails;
-				}
+
+        let productData = product;
+        if (product.status == "P") {
+          productData = product.oldDetails;
+        }
         return {
           ...productData,
-          category,
+          // category,
           canAddReview: reviewedProducts.includes(product._id.toString()),
           reviews,
           vendorDetails:
@@ -370,15 +370,15 @@ exports.findById = async (req) => {
       ["user"]
     );
 
-		let productData = isProduct._doc;
-		if(isProduct._doc.status=='P'){
-			productData = isProduct._doc.oldDetails;
-		}
+    let productData = isProduct._doc;
+    if (isProduct._doc.status == "P") {
+      productData = isProduct._doc.oldDetails;
+    }
 
     isProduct = {
       ...productData,
       reviews,
-      category: category ? category : isProduct.category,
+      // category: category ? category : isProduct.category,
       canAddReview: reviewedProducts.includes(isProduct._id.toString()),
       vendorDetails: {
         email: vendor.email,
