@@ -75,18 +75,39 @@ exports.approveProduct = async (req) => {
       return response(true, "Product already approved", null, [], 400);
     }
 
-    isProduct.status = "A";
-    // Check if markup_price is provided in the request
-    if (req.body.markup_price !== undefined) {
-      // If provided, add the markup_price field to the product object
+    // Check if markup_price and markup_type are provided in the request
+    if (
+      req.body.markup_price !== undefined &&
+      req.body.markup_type !== undefined
+    ) {
+      // If provided, update markup_price and markup_type fields of the product object
       isProduct.markup_price = req.body.markup_price;
+      isProduct.markup_type = req.body.markup_type;
+
+      // Calculate total_price based on markup_type and markup_price
+      if (isProduct.markup_type === "Flat") {
+        isProduct.total_price =
+          isProduct.price + parseFloat(isProduct.markup_price);
+      } else if (isProduct.markup_type === "Percentage") {
+        const markupAmount =
+          (isProduct.price * parseFloat(isProduct.markup_price)) / 100;
+        isProduct.total_price = isProduct.price + markupAmount;
+      }
     }
 
-    // Check if total_price is provided in the request
-    if (req.body.total_price !== undefined) {
-      // If provided, add the total_price field to the product object
-      isProduct.total_price = req.body.total_price;
-    }
+    isProduct.status = "A";
+
+    // // Check if markup_price is provided in the request
+    // if (req.body.markup_price !== undefined) {
+    //   // If provided, add the markup_price field to the product object
+    //   isProduct.markup_price = req.body.markup_price;
+    // }
+
+    // // Check if total_price is provided in the request
+    // if (req.body.total_price !== undefined) {
+    //   // If provided, add the total_price field to the product object
+    //   isProduct.total_price = req.body.total_price;
+    // }
 
     isProduct.oldDetails = null;
 

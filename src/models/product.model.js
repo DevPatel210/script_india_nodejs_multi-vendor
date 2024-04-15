@@ -40,6 +40,10 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    markup_type: {
+      type: String,
+      enum: ["Flat", "Percentage"], // Allow only "Flat" or "Percentage"
+    },
     total_price: {
       type: Number,
     },
