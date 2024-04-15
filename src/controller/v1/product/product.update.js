@@ -30,6 +30,24 @@ exports.Update = async (req) => {
     }
     const productData = req.body; // update product payload
 
+    // Check if markup_price and markup_type are provided in the request
+    if (
+      productData.markup_price !== undefined &&
+      productData.markup_type !== undefined
+    ) {
+      // If provided, update markup_price and markup_type fields of the product data
+      productData.markup_price = parseFloat(productData.markup_price);
+      productData.markup_type = productData.markup_type;
+
+      // Calculate total_price based on markup_type and markup_price
+      if (productData.markup_type === "Flat") {
+        productData.total_price = isProduct.price + productData.markup_price;
+      } else if (productData.markup_type === "Percentage") {
+        const markupAmount = (isProduct.price * productData.markup_price) / 100;
+        productData.total_price = isProduct.price + markupAmount;
+      }
+    }
+
     if (typeof productData.bean === "string") {
       productData.bean = productData.bean.split(",");
     }
