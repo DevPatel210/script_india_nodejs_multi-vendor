@@ -229,6 +229,10 @@ exports.findAll = async (req) => {
 
       reviewedProducts = Array.from(productsSet);
     }
+    productsList = productsList.filter(
+      (product) => !(product.status == "P" && product.oldDetails == null)
+    );
+
     productsList = await Promise.all(
       productsList.map(async (product) => {
         let vendor = vendors[product.vendor];

@@ -38,6 +38,7 @@ const productSchema = new mongoose.Schema(
     // },
     markup_price: {
       type: String,
+      required: true,
     },
     total_price: {
       type: Number,

@@ -39,7 +39,7 @@ exports.Update = async (req) => {
     }
     const updatedProduct = await makeMongoDbService.findOneAndUpdateDocument(
       { _id: req.body.product_id },
-      {...productData, oldDetails: isProduct }
+      { ...productData, oldDetails: isProduct }
     );
 
     if (req.isVendor) {
