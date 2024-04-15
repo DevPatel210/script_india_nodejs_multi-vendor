@@ -231,9 +231,9 @@ exports.findAll = async (req) => {
 
       reviewedProducts = Array.from(productsSet);
     }
-    productsList = productsList.filter(
-      (product) => !(product.status == "P" && product.oldDetails == null)
-    );
+    // productsList = productsList.filter(
+    //   (product) => !(product.status == "P" && product.oldDetails == null)
+    // );
 
     productsList = await Promise.all(
       productsList.map(async (product) => {
@@ -255,8 +255,9 @@ exports.findAll = async (req) => {
         );
 
         let productData = product;
-        if (product.status == "P") {
-          productData = product.oldDetails;
+        if (product.status == "P" && product.oldDetails) {
+          // Merge original productData with oldDetails
+          productData = { ...productData, ...product.oldDetails };
         }
         return {
           ...productData,
@@ -273,9 +274,7 @@ exports.findAll = async (req) => {
                   commission: vendor.commission,
                   display: vendor.display,
                 },
-          //commission: (product.price * vendor.commission) / 100,
-          //finalPrice: product.price + (product.price * vendor.commission) / 100,
-          finalPrice: product.total_price ? product.total_price.toFixed(2) : 0, // Set finalPrice equal to total_price with 2 decimal places
+          finalPrice: product.total_price ? product.total_price.toFixed(2) : 0,
         };
       })
     );
