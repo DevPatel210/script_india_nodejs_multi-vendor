@@ -121,7 +121,6 @@ exports.findAll = async (req) => {
         });
       }
     }
-
     let productsList, productCount;
     if (req.isVendor) {
       if (!matchCondition.$and) {
@@ -253,9 +252,8 @@ exports.findAll = async (req) => {
         let category = await makeMongoDbServiceCategory.getDocumentById(
           product.category
         );
-
         let productData = product;
-        if (product.status == "P" && product.oldDetails) {
+        if (!(req.isAdmin || req.isVendor) && (product.status == "P" && product.oldDetails)) {
           // Merge original productData with oldDetails
           productData = { ...productData, ...product.oldDetails };
         }
@@ -274,7 +272,7 @@ exports.findAll = async (req) => {
                   commission: vendor.commission,
                   display: vendor.display,
                 },
-          finalPrice: product.total_price ? product.total_price.toFixed(2) : 0,
+          finalPrice: productData.total_price ? productData.total_price.toFixed(2) : 0,
         };
       })
     );

@@ -6,11 +6,11 @@ const rules = require("../validations/product.validation");
 const product = require("../controller/v1/product");
 const { handleImageFile } = require("../services/multerService");
 const { isVendorAuth } = require("../middleware/checkVendor.mdl");
-const { verifyToken, isAdmin } = require("../middleware/auth.mdl");
+const { verifyToken, isAdmin, isVendor } = require("../middleware/auth.mdl");
 
 router.post("/add", verifyToken, isVendorAuth, handleImageFile, validate(rules.addProduct), product.create);
 
-router.get("/all", validate(rules.getAllProducts), product.findAll);
+router.get("/all", validate(rules.getAllProducts), isAdmin, isVendor, product.findAll);
 
 router.get("/vendor/all", verifyToken, isVendorAuth, validate(rules.getAllProducts), product.findAll);
 

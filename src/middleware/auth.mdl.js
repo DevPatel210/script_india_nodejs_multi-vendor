@@ -65,8 +65,8 @@ exports.verifyToken = async (req, res, next) => {
 exports.isAdmin = async (req, res, next) => {
 	try {
 		if (
-			req.headers ||
-			req.headers.authorization ||
+			req.headers &&
+			req.headers.authorization &&
 			req.headers.authorization.startsWith("Bearer ")
 		) {
 			const token = req.headers.authorization.split(" ")[1];
@@ -101,8 +101,8 @@ exports.isAdmin = async (req, res, next) => {
 exports.isVendor = async (req, res, next) => {
 	try {
 		if (
-			req.headers ||
-			req.headers.authorization ||
+			req.headers &&
+			req.headers.authorization &&
 			req.headers.authorization.startsWith("Bearer ")
 		) {
 			const token = req.headers.authorization.split(" ")[1];
@@ -124,6 +124,7 @@ exports.isVendor = async (req, res, next) => {
 				next();
 			} else {
 				req.isVendor = true;
+				req.vendor = vendor;
 				next();
 			}
 		} else {
