@@ -46,6 +46,13 @@ exports.Update = async (req) => {
         const markupAmount = (isProduct.price * productData.markup_price) / 100;
         productData.total_price = isProduct.price + markupAmount;
       }
+    }else if(productData.price!=undefined){
+      if (isProduct.markup_type === "Flat") {
+        productData.total_price = parseFloat(productData.price) + parseFloat(isProduct.markup_price);
+      } else if (isProduct.markup_type === "Percentage") {
+        const markupAmount = (parseFloat(productData.price) * parseFloat(isProduct.markup_price)) / 100;
+        productData.total_price = productData.price + markupAmount;
+      }
     }
 
     if (typeof productData.bean === "string") {
@@ -54,6 +61,9 @@ exports.Update = async (req) => {
 
     if (typeof productData.image == "string") {
       delete productData.image;
+    }
+    if(isProduct.oldDetails){
+      isProduct.oldDetails=null;
     }
     const updatedProduct = await makeMongoDbService.findOneAndUpdateDocument(
       { _id: req.body.product_id },
