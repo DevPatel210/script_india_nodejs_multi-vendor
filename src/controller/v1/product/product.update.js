@@ -37,20 +37,26 @@ exports.Update = async (req) => {
     ) {
       // If provided, update markup_price and markup_type fields of the product data
       productData.markup_price = parseFloat(productData.markup_price);
+      productData.price = parseFloat(productData.price);
       productData.markup_type = productData.markup_type;
-
+      console.log(productData);
       // Calculate total_price based on markup_type and markup_price
       if (productData.markup_type === "Flat") {
-        productData.total_price = isProduct.price + productData.markup_price;
+        productData.total_price = productData.price + productData.markup_price;
       } else if (productData.markup_type === "Percentage") {
-        const markupAmount = (isProduct.price * productData.markup_price) / 100;
-        productData.total_price = isProduct.price + markupAmount;
+        const markupAmount =
+          (productData.price * productData.markup_price) / 100;
+        productData.total_price = productData.price + markupAmount;
       }
-    }else if(productData.price!=undefined){
+      console.log(productData);
+    } else if (productData.price != undefined) {
       if (isProduct.markup_type === "Flat") {
-        productData.total_price = parseFloat(productData.price) + parseFloat(isProduct.markup_price);
+        productData.total_price =
+          parseFloat(productData.price) + parseFloat(isProduct.markup_price);
       } else if (isProduct.markup_type === "Percentage") {
-        const markupAmount = (parseFloat(productData.price) * parseFloat(isProduct.markup_price)) / 100;
+        const markupAmount =
+          (parseFloat(productData.price) * parseFloat(isProduct.markup_price)) /
+          100;
         productData.total_price = productData.price + markupAmount;
       }
     }
@@ -62,8 +68,8 @@ exports.Update = async (req) => {
     if (typeof productData.image == "string") {
       delete productData.image;
     }
-    if(isProduct.oldDetails){
-      isProduct.oldDetails=null;
+    if (isProduct.oldDetails) {
+      isProduct.oldDetails = null;
     }
     const updatedProduct = await makeMongoDbService.findOneAndUpdateDocument(
       { _id: req.body.product_id },
