@@ -18,7 +18,8 @@ const { response, resMessage } = require("../../../helpers/common");
 const { default: mongoose } = require("mongoose");
 const { sendEmail } = require("../../../services/email");
 
-const unitShippingCost=6;
+const unitShippingCost_firstProduct=6;
+const unitShippingCost_nextProducts=2;
 
 exports.get = async (req) => {
   try {
@@ -130,7 +131,9 @@ exports.get = async (req) => {
           totalItems += product.quantity;
         }
 
-        totalPrice += totalItems*unitShippingCost
+        // in this case as we have only one vendor so we can calculate as below
+        const totalShippingCost = totalItems.length <= 1 ? totalItems*unitShippingCost_firstProduct : unitShippingCost_firstProduct + ((totalItems-1)*unitShippingCost_nextProducts);
+        totalPrice += totalShippingCost;
 
         filteredOrder.accounting.cartAccountingList = filteredProducts;
         filteredOrder.vendorNames = filteredOrder.vendorNames
@@ -140,6 +143,7 @@ exports.get = async (req) => {
               return arr.join(" ");
             })
           : [];
+        filteredOrder.accounting.shippingCost = totalShippingCost;
         filteredOrder.accounting.finalTotal = totalPrice;
         return filteredOrder;
       });
@@ -380,7 +384,13 @@ exports.getPaid = async (req) => {
         totalPrice += product.totalPrice;
         totalItems += product.quantity;
       }
-      totalPrice += totalItems*unitShippingCost;
+
+      let totalShippingCost = order.accounting.shippingCost;
+      if(req.isVendor) {
+        // in this case as we have only one vendor so we can calculate as below
+        totalShippingCost = totalItems <= 1 ? totalItems*unitShippingCost_firstProduct : unitShippingCost_firstProduct + ((totalItems-1)*unitShippingCost_nextProducts);
+      }
+      totalPrice += totalShippingCost
 
       filteredOrder.accounting.cartAccountingList = filteredProducts;
       filteredOrder.vendorNames = filteredOrder.vendorNames
@@ -390,6 +400,8 @@ exports.getPaid = async (req) => {
             return arr.join(" ");
           })
         : [];
+      
+      filteredOrder.accounting.shippingCost = totalShippingCost;
       filteredOrder.accounting.finalTotal = totalPrice;
       return filteredOrder;
     });
@@ -609,7 +621,12 @@ exports.getShipped = async (req) => {
         totalPrice += product.totalPrice;
         totalItems += product.quantity;
       }
-      totalPrice += totalItems*unitShippingCost
+      let totalShippingCost = order.accounting.shippingCost;
+      if(req.isVendor) {
+        // in this case as we have only one vendor so we can calculate as below
+        totalShippingCost = totalItems <= 1 ? totalItems*unitShippingCost_firstProduct : unitShippingCost_firstProduct + ((totalItems-1)*unitShippingCost_nextProducts);
+      }
+      totalPrice += totalShippingCost
 
       filteredOrder.accounting.cartAccountingList = filteredProducts;
       filteredOrder.vendorNames = filteredOrder.vendorNames
@@ -619,6 +636,8 @@ exports.getShipped = async (req) => {
             return arr.join(" ");
           })
         : [];
+
+      filteredOrder.accounting.shippingCost = totalShippingCost;
       filteredOrder.accounting.finalTotal = totalPrice;
       return filteredOrder;
     });
@@ -835,7 +854,13 @@ exports.getCancel = async (req) => {
         totalPrice += product.totalPrice;
         totalItems += product.quantity;
       }
-      totalPrice += totalItems*unitShippingCost
+      
+      let totalShippingCost = order.accounting.shippingCost;
+      if(req.isVendor) {
+        // in this case as we have only one vendor so we can calculate as below
+        totalShippingCost = totalItems <= 1 ? totalItems*unitShippingCost_firstProduct : unitShippingCost_firstProduct + ((totalItems-1)*unitShippingCost_nextProducts);
+      }
+      totalPrice += totalShippingCost
 
       filteredOrder.accounting.cartAccountingList = filteredProducts;
       filteredOrder.vendorNames = filteredOrder.vendorNames
@@ -845,6 +870,8 @@ exports.getCancel = async (req) => {
             return arr.join(" ");
           })
         : [];
+
+      filteredOrder.accounting.shippingCost = totalShippingCost;
       filteredOrder.accounting.finalTotal = totalPrice;
       return filteredOrder;
     });
@@ -1061,7 +1088,12 @@ exports.getPaymentFailed = async (req) => {
         totalPrice += product.totalPrice;
         totalItems += product.quantity;
       }
-      totalPrice += totalItems*unitShippingCost;
+      let totalShippingCost = order.accounting.shippingCost;
+      if(req.isVendor) {
+        // in this case as we have only one vendor so we can calculate as below
+        totalShippingCost = totalItems <= 1 ? totalItems*unitShippingCost_firstProduct : unitShippingCost_firstProduct + ((totalItems-1)*unitShippingCost_nextProducts);
+      }
+      totalPrice += totalShippingCost
 
       filteredOrder.accounting.cartAccountingList = filteredProducts;
       filteredOrder.vendorNames = filteredOrder.vendorNames
@@ -1071,6 +1103,8 @@ exports.getPaymentFailed = async (req) => {
             return arr.join(" ");
           })
         : [];
+
+      filteredOrder.accounting.shippingCost = totalShippingCost;
       filteredOrder.accounting.finalTotal = totalPrice;
       return filteredOrder;
     });
@@ -1287,6 +1321,19 @@ exports.getByDate = async (req) => {
           );
         }
 
+        let totalPrice = 0;
+        let totalItems = 0;
+        for (let product of filteredProducts) {
+          totalPrice += product.totalPrice;
+          totalItems += product.quantity;
+        }
+        let totalShippingCost = order.accounting.shippingCost;
+        if(req.isVendor) {
+          // in this case as we have only one vendor so we can calculate as below
+          totalShippingCost = totalItems <= 1 ? totalItems*unitShippingCost_firstProduct : unitShippingCost_firstProduct + ((totalItems-1)*unitShippingCost_nextProducts);
+        }
+        totalPrice += totalShippingCost
+
         filteredOrder.vendorNames = filteredOrder.vendorNames
           ? filteredOrder.vendorNames.map((name) => {
               let arr = name.split(" ");
@@ -1294,6 +1341,9 @@ exports.getByDate = async (req) => {
               return arr.join(" ");
             })
           : [];
+
+        filteredOrder.accounting.shippingCost = totalShippingCost;
+        filteredOrder.accounting.finalTotal = totalPrice;
         filteredOrder.accounting.cartAccountingList = filteredProducts.map(
           (product) => {
             // console.log(product);

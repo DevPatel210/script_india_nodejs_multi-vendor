@@ -28,7 +28,8 @@ const makeMongoDbServiceUser = require("../../../services/mongoDbService")({
 });
 
 exports.accounting = async (req) => {
-  const unitShippingCost = 6;
+  const unitShippingCost_firstProduct = 6;
+  const unitShippingCost_nextProducts = 2;
   try {
     let cartId = req.body.cartId;
     let orderAccounting = {};
@@ -60,12 +61,14 @@ exports.accounting = async (req) => {
     const vendorset = new Set();
 
     let totalItems = 0;
+    let itemsGroupedByVendor = {}
     for (const productListitem of cartItems) {
       var newProduct = productListitem.product;
       var cartAccountingItem = {};
       cartAccountingItem["productId"] = newProduct._id;
       cartAccountingItem["vendorId"] = newProduct.vendor;
       vendorset.add(newProduct.vendor.toString());
+      itemsGroupedByVendor[newProduct.vendor.toString()] = itemsGroupedByVendor[newProduct.vendor.toString()] ? itemsGroupedByVendor[newProduct.vendor.toString()]+productListitem.quantity : productListitem.quantity;
       cartAccountingItem["productName"] = newProduct.title || "";
       cartAccountingItem["unitPrice"] = newProduct.price || 0;
       let vendor = vendors[newProduct.vendor];
@@ -88,13 +91,22 @@ exports.accounting = async (req) => {
       cartAccountingList.push(cartAccountingItem);
     }
 
-    let finalTotal = totalItems*unitShippingCost;
+    let totalShippingCost = 0;
+    for(let vendor of Object.keys(itemsGroupedByVendor)){
+      if(itemsGroupedByVendor[vendor]==1) {
+        totalShippingCost += unitShippingCost_firstProduct;
+      }else{
+        totalShippingCost += unitShippingCost_firstProduct + ((itemsGroupedByVendor[vendor]-1)*unitShippingCost_nextProducts);
+      }
+    }
+    let finalTotal = 0;
     for (let index = 0; index < cartAccountingList.length; index++) {
       const cartAccountingItem = cartAccountingList[index];
       finalTotal += cartAccountingItem["totalPrice"];
     }
+    finalTotal += totalShippingCost;
     orderAccounting.finalTotal = parseInt(finalTotal);
-    orderAccounting.shippingCost = totalItems*unitShippingCost;
+    orderAccounting.shippingCost = totalShippingCost;
     orderAccounting.cartAccountingList = cartAccountingList;
     let payload = {
       cart_id: cartId,
@@ -147,7 +159,7 @@ exports.accounting = async (req) => {
       trackingDetails: {},
       // paymentId,
     });
-    await sendEmail(req.user.email, "Order Placed", message, true);
+    // await sendEmail(req.user.email, "Order Placed", message, true);
     let vendorDetails = await makeMongoDbServiceVendor.getDocumentByQuery({ _id: { $in: Array.from(vendorset) }});
     vendorDetails = vendorDetails.reduce((obj, item) => ((obj[item._id] = item), obj), {})
     orderAccounting.cartAccountingList = orderAccounting.cartAccountingList.reduce((group, product) => {
