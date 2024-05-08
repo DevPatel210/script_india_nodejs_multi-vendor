@@ -230,9 +230,11 @@ exports.findAll = async (req) => {
 
       reviewedProducts = Array.from(productsSet);
     }
-    productsList = productsList.filter(
-      (product) => !(product.status == "P" && product.oldDetails == null)
-    );
+    if (!(req.isAdmin || req.isVendor)) {
+      productsList = productsList.filter(
+        (product) => !(product.status == "P" && product.oldDetails == null)
+      );
+    }
 
     productsList = await Promise.all(
       productsList.map(async (product) => {
