@@ -59,24 +59,28 @@ exports.accounting = async (req) => {
     );
     let cartItems = cartData.cartItems;
     const vendorset = new Set();
-
     let totalItems = 0;
-    let itemsGroupedByVendor = {}
+    let itemsGroupedByVendor = {};
+    let vendorShippingCosts = {}; // Object to store vendor-wise shipping costs
+
     for (const productListitem of cartItems) {
       var newProduct = productListitem.product;
       var cartAccountingItem = {};
       cartAccountingItem["productId"] = newProduct._id;
       cartAccountingItem["vendorId"] = newProduct.vendor;
       vendorset.add(newProduct.vendor.toString());
-      itemsGroupedByVendor[newProduct.vendor.toString()] = itemsGroupedByVendor[newProduct.vendor.toString()] ? itemsGroupedByVendor[newProduct.vendor.toString()]+productListitem.quantity : productListitem.quantity;
+      itemsGroupedByVendor[newProduct.vendor.toString()] = itemsGroupedByVendor[
+        newProduct.vendor.toString()
+      ]
+        ? itemsGroupedByVendor[newProduct.vendor.toString()] +
+          productListitem.quantity
+        : productListitem.quantity;
       cartAccountingItem["productName"] = newProduct.title || "";
       cartAccountingItem["unitPrice"] = newProduct.price || 0;
       let vendor = vendors[newProduct.vendor];
       if (!vendor || !vendor.commission) {
         vendor = { commission: 0 };
       }
-      // cartAccountingItem["category"] =
-      //   category[newProduct.category.toString()].name;
       cartAccountingItem["unitCommission"] =
         (cartAccountingItem["unitPrice"] * vendor.commission) / 100;
       cartAccountingItem["finalUnitPrice"] =
@@ -84,30 +88,44 @@ exports.accounting = async (req) => {
       cartAccountingItem["quantity"] = productListitem.quantity;
       totalItems += productListitem.quantity;
       cartAccountingItem["bean"] = productListitem.bean;
-      // cartAccountingItem["totalCommission"] = cartAccountingItem["unitCommission"] * cartAccountingItem["quantity"];
-      //cartAccountingItem["totalPrice"] = cartAccountingItem["finalUnitPrice"] * cartAccountingItem["quantity"];
       cartAccountingItem["totalPrice"] =
         cartAccountingItem["unitPrice"] * cartAccountingItem["quantity"];
       cartAccountingList.push(cartAccountingItem);
     }
 
-    let totalShippingCost = 0;
-    for(let vendor of Object.keys(itemsGroupedByVendor)){
-      if(itemsGroupedByVendor[vendor]==1) {
-        totalShippingCost += unitShippingCost_firstProduct;
-      }else{
-        totalShippingCost += unitShippingCost_firstProduct + ((itemsGroupedByVendor[vendor]-1)*unitShippingCost_nextProducts);
+    // Calculate shipping costs for each vendor
+    for (let vendor of Object.keys(itemsGroupedByVendor)) {
+      let vendorShipping = 0;
+      if (itemsGroupedByVendor[vendor] == 1) {
+        vendorShipping = unitShippingCost_firstProduct;
+      } else {
+        vendorShipping =
+          unitShippingCost_firstProduct +
+          (itemsGroupedByVendor[vendor] - 1) * unitShippingCost_nextProducts;
       }
+      vendorShippingCosts[vendor] = vendorShipping;
     }
+
     let finalTotal = 0;
     for (let index = 0; index < cartAccountingList.length; index++) {
       const cartAccountingItem = cartAccountingList[index];
       finalTotal += cartAccountingItem["totalPrice"];
     }
+
+    let totalShippingCost = Object.values(vendorShippingCosts).reduce(
+      (acc, cur) => acc + cur,
+      0
+    );
+
     finalTotal += totalShippingCost;
+
     orderAccounting.finalTotal = parseInt(finalTotal);
     orderAccounting.shippingCost = totalShippingCost;
     orderAccounting.cartAccountingList = cartAccountingList;
+
+    // Include vendor-wise shipping costs in the response
+    orderAccounting.vendorShippingCosts = vendorShippingCosts;
+
     let payload = {
       cart_id: cartId,
       amountToCharge: orderAccounting.finalTotal,
@@ -160,22 +178,28 @@ exports.accounting = async (req) => {
       // paymentId,
     });
     // await sendEmail(req.user.email, "Order Placed", message, true);
-    let vendorDetails = await makeMongoDbServiceVendor.getDocumentByQuery({ _id: { $in: Array.from(vendorset) }});
-    vendorDetails = vendorDetails.reduce((obj, item) => ((obj[item._id] = item), obj), {})
-    orderAccounting.cartAccountingList = orderAccounting.cartAccountingList.reduce((group, product) => {
-      let { vendorId } = product;
-      vendorId = vendorId.toString();
-      group[vendorId] = group[vendorId] ?? [];
-      group[vendorId].push(product);
-      return group;
-    }, {});
+    let vendorDetails = await makeMongoDbServiceVendor.getDocumentByQuery({
+      _id: { $in: Array.from(vendorset) },
+    });
+    vendorDetails = vendorDetails.reduce(
+      (obj, item) => ((obj[item._id] = item), obj),
+      {}
+    );
+    orderAccounting.cartAccountingList =
+      orderAccounting.cartAccountingList.reduce((group, product) => {
+        let { vendorId } = product;
+        vendorId = vendorId.toString();
+        group[vendorId] = group[vendorId] ?? [];
+        group[vendorId].push(product);
+        return group;
+      }, {});
     let finalGroupedObject = [];
-    for( let vendorId of Object.keys(orderAccounting.cartAccountingList)) {
+    for (let vendorId of Object.keys(orderAccounting.cartAccountingList)) {
       finalGroupedObject.push({
         vendorDetails: vendorDetails[vendorId],
         products: orderAccounting.cartAccountingList[vendorId],
-      })
-    };
+      });
+    }
     orderAccounting.cartAccountingList = finalGroupedObject;
     return response(
       false,
@@ -183,7 +207,6 @@ exports.accounting = async (req) => {
       null,
       {
         ...orderAccounting,
-        // vendorDetails: vendorDetails.reduce((obj, item) => ((obj[item._id] = item), obj), {}),
         order_id: responseData._id.toString(),
         vendorNames: Array.from(vendorset).map(
           (id) => `${vendors[id].first_name} ${vendors[id].last_name}`
