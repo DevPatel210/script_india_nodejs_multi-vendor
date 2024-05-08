@@ -177,7 +177,7 @@ exports.accounting = async (req) => {
       trackingDetails: {},
       // paymentId,
     });
-    // await sendEmail(req.user.email, "Order Placed", message, true);
+    await sendEmail(req.user.email, "Order Placed", message, true);
     let vendorDetails = await makeMongoDbServiceVendor.getDocumentByQuery({
       _id: { $in: Array.from(vendorset) },
     });
