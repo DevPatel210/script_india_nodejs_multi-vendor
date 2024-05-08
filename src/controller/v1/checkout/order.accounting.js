@@ -196,7 +196,10 @@ exports.accounting = async (req) => {
     let finalGroupedObject = [];
     for (let vendorId of Object.keys(orderAccounting.cartAccountingList)) {
       finalGroupedObject.push({
-        vendorDetails: vendorDetails[vendorId],
+        vendorDetails: {
+          ...vendorDetails[vendorId]._doc,
+          shippingCost: vendorShippingCosts[vendorId]
+        },
         products: orderAccounting.cartAccountingList[vendorId],
       });
     }
