@@ -3,6 +3,7 @@ const { verifyPayment } = require("../../../services/payment");
 const { default: mongoose } = require("mongoose");
 const { Order } = require("../../../models/order.model");
 const { User } = require("../../../models/user.model");
+const { Vendor } = require("../../../models/vendor.model");
 const { sendEmail } = require("../../../services/email");
 
 const makeMongoDbServiceOrder = require("../../../services/mongoDbService")({
@@ -10,6 +11,9 @@ const makeMongoDbServiceOrder = require("../../../services/mongoDbService")({
 });
 const makeMongoDbServiceUser = require("../../../services/mongoDbService")({
   model: User,
+});
+const makeMongoDbServiceVendor = require("../../../services/mongoDbService")({
+  model: Vendor,
 });
 
 // exports.verifyOrder = async (req) => {
@@ -66,6 +70,11 @@ exports.verifyOrder = async (req) => {
       const user = await makeMongoDbServiceUser.getDocumentById(order.user_id);
       const message = getPaymentSuccessfulMessage(order);
       await sendEmail(user.email, "Payment Successful", message);
+      for(let vendorId of order.vendors){
+        const vendor = await makeMongoDbServiceVendor.getDocumentById(vendorId);
+        const vendorMessage = getPaymentSuccessfulMessageVendor(order);
+        await sendEmail(vendor.email, "Payment Successful", vendorMessage);
+      }
       return response(
         false,
         "Payment received successfully.",
@@ -95,6 +104,17 @@ function getPaymentSuccessfulMessage(order) {
   return `
 		Dear customer,<br>
 		Your payment is completed successfully. Please find the details of your order below: 
+		<h4>Order id:</h4> ${order._id.toString()}
+		<h4>Shipping Address:</h4> ${order.shippingAddress}
+		<h4>Billing Address:</h4> ${order.billingAddress}
+		<h4>Final Price:</h4> $ ${order.accounting.finalTotal}
+	`;
+}
+
+function getPaymentSuccessfulMessageVendor(order) {
+  return `
+		Dear Vendor,<br>
+		Payment is completed successfully for an order. Please find the details of your order below: 
 		<h4>Order id:</h4> ${order._id.toString()}
 		<h4>Shipping Address:</h4> ${order.shippingAddress}
 		<h4>Billing Address:</h4> ${order.billingAddress}
