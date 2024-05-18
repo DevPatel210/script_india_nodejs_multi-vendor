@@ -1249,6 +1249,11 @@ exports.getByDate = async (req) => {
       );
     }
 
+    let orderStatus = 'C';
+    if(req.query && req.query.status){
+      orderStatus = req.query.status;
+    }
+
     const startDateParts = req.query.startDate.split("-");
     const startDate = new Date(
       startDateParts[2],
@@ -1276,7 +1281,7 @@ exports.getByDate = async (req) => {
     let matchCondition = {
       $and: [
         {
-          status: "C",
+          status: orderStatus,
         },
         {
           createdAt: {
