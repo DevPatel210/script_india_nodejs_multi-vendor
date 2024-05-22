@@ -44,7 +44,7 @@ exports.findAll = async (req) => {
             { country: { $regex: searchValue, $options: "i" } },
             { state: { $regex: searchValue, $options: "i" } },
             { pincode: { $regex: searchValue, $options: "i" } },
-            { phone_number: { $regex: searchValue, $options: "i" } },
+            // { phone_number: { $regex: searchValue, $options: "i" } },
           ],
         });
       }
@@ -94,6 +94,7 @@ exports.findAll = async (req) => {
     }
     return response(true, null, resMessage.failed,[],400);
   } catch (error) {
+    console.log(error)
     return response(true, null, error.message, error.stack,500);
   }
 };
