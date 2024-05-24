@@ -76,15 +76,15 @@ exports.accounting = async (req) => {
           productListitem.quantity
         : productListitem.quantity;
       cartAccountingItem["productName"] = newProduct.title || "";
-      cartAccountingItem["unitPrice"] = newProduct.price || 0;
+      cartAccountingItem["unitPrice"] = newProduct.total_price || 0;
       let vendor = vendors[newProduct.vendor];
       if (!vendor || !vendor.commission) {
         vendor = { commission: 0 };
       }
-      cartAccountingItem["unitCommission"] =
-        (cartAccountingItem["unitPrice"] * vendor.commission) / 100;
-      cartAccountingItem["finalUnitPrice"] =
-        cartAccountingItem["unitPrice"] + cartAccountingItem["unitCommission"];
+      // cartAccountingItem["unitCommission"] =
+      //   (cartAccountingItem["unitPrice"] * vendor.commission) / 100;
+      // cartAccountingItem["finalUnitPrice"] =
+      //   cartAccountingItem["unitPrice"] + cartAccountingItem["unitCommission"];
       cartAccountingItem["quantity"] = productListitem.quantity;
       totalItems += productListitem.quantity;
       cartAccountingItem["bean"] = productListitem.bean;
@@ -119,7 +119,7 @@ exports.accounting = async (req) => {
 
     finalTotal += totalShippingCost;
 
-    orderAccounting.finalTotal = parseInt(finalTotal);
+    orderAccounting.finalTotal = parseFloat(finalTotal);
     orderAccounting.shippingCost = totalShippingCost;
     orderAccounting.cartAccountingList = cartAccountingList;
 
@@ -233,7 +233,7 @@ function getOrderPlacedMessage(order) {
     return `<li>
 			Title: ${product.productDetails.title} <br>
 			Category: ${product.category} <br>
-			Unit Price: $ ${product.finalUnitPrice} <br>
+			Unit Price: $ ${product.unitPrice} <br>
 			Quantity: ${product.quantity} <br>
 			Total Price: $ ${product.totalPrice} <br>
 		</li>`;
