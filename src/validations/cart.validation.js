@@ -19,12 +19,6 @@ module.exports = {
 
   checkout: [
     body("cartId", "Enter valid cart id").notEmpty().isString().isMongoId(),
-    body("shippingAddress", "Please provide the shipping address")
-      .notEmpty()
-      .isString(),
-    body("billingAddress", "Please provide the billing address")
-      .notEmpty()
-      .isString(),
   ],
 
   removeProductFromCart: [
@@ -37,5 +31,13 @@ module.exports = {
   verifyOrder: [
     body("paymentId", "Enter valid payment id").notEmpty().isString(),
     body("order_id", "Enter valid order id").notEmpty().isString(),
+    body("shippingAddress", "Please provide the shipping address")
+      .notEmpty()
+      .optional()
+      .isString(),
+    body("billingAddress", "Please provide the billing address")
+      .notEmpty()
+      .optional()
+      .isString(),
   ],
 };

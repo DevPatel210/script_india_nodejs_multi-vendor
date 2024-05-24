@@ -134,16 +134,19 @@ exports.accounting = async (req) => {
     var paymentCred = await createPaymentIntent(payload);
     // var paymentId = paymentCred.id;
 
-    let shippingAddress = req.body.shippingAddress;
-    let billingAddress = req.body.billingAddress;
-    if (!shippingAddress) {
-      const user = await makeMongoDbServiceUser.getDocumentById(req.user._id);
-      shippingAddress = user.address;
-    }
-    if (!billingAddress) {
-      const user = await makeMongoDbServiceUser.getDocumentById(req.user._id);
-      billingAddress = user.address;
-    }
+    // let shippingAddress = req.body.shippingAddress;
+    // let billingAddress = req.body.billingAddress;
+    // if (!shippingAddress) {
+    //   const user = await makeMongoDbServiceUser.getDocumentById(req.user._id);
+    //   shippingAddress = user.address;
+    // }
+    // if (!billingAddress) {
+      //   const user = await makeMongoDbServiceUser.getDocumentById(req.user._id);
+      //   billingAddress = user.address;
+      // }
+    const user = await makeMongoDbServiceUser.getDocumentById(req.user._id);
+    let shippingAddress = user.address;
+    let billingAddress = user.address;
     const responseData = await makeMongoDbServiceOrder.createDocument({
       user_id: req.user._id,
       cart_id: cartId,

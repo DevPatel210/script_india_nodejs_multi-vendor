@@ -47,6 +47,11 @@ const makeMongoDbServiceVendor = require("../../../services/mongoDbService")({
 exports.verifyOrder = async (req) => {
   let order_id = req.body.order_id;
   let paymentId = req.body.paymentId;
+  let shippingAddress = req.body.shippingAddress;
+  let billingAddress = req.body.billingAddress;
+  const requestBody = {
+    payment_status: "C", status: "P", paymentId
+  };
   try {
     let order;
 
@@ -61,11 +66,17 @@ exports.verifyOrder = async (req) => {
       };
     }
 
+    if(shippingAddress && shippingAddress.length>0){
+      requestBody.shippingAddress = shippingAddress
+    }
+    if(billingAddress && billingAddress.length>0){
+      requestBody.billingAddress = billingAddress
+    }
     let paymentIntent = await verifyPayment(paymentId);
     if (paymentIntent.status === "succeeded") {
       order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
         { _id: order_id },
-        { payment_status: "C", status: "P", paymentId }
+        requestBody
       );
       const user = await makeMongoDbServiceUser.getDocumentById(order.user_id);
       const message = getPaymentSuccessfulMessage(order);
@@ -83,17 +94,21 @@ exports.verifyOrder = async (req) => {
         200
       );
     } else {
+      requestBody.payment_status = "PF";
+      requestBody.status = "PF";
       order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
         { _id: order_id },
-        { payment_status: "PF", status: "PF", paymentId } // Update status to "PF" (Payment Failed)
+        requestBody // Update status to "PF" (Payment Failed)
       );
       return response(true, "Order payment failed.", null, order, 400);
     }
   } catch (error) {
     // If an error occurs, update the order status to "PF" and throw an error
+    requestBody.payment_status = "PF";
+    requestBody.status = "PF";
     const order = await makeMongoDbServiceOrder.findOneAndUpdateDocument(
       { _id: order_id },
-      { payment_status: "PF", status: "PF", paymentId } // Update status to "PF" (Payment Failed)
+      requestBody // Update status to "PF" (Payment Failed)
     );
     console.error(error.message);
     throw response(true, null, error.message, error.stack, 500);
