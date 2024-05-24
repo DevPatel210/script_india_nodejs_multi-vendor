@@ -33,13 +33,14 @@ exports.findAll = async (req) => {
     const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
     let sortCriteria = { _id: -1 };
     if (req.query && req.query.sort) {
-      if (req.query.sort == "atoz") {
-        sortCriteria = { title: 1 };
-      } else if (req.query.sort == "ztoa") {
-        sortCriteria = { title: -1 };
-      } else if (req.query.sort == "priceLow") {
+      // if (req.query.sort == "atoz") {
+      //   sortCriteria = { title: 1 };
+      // } else if (req.query.sort == "ztoa") {
+      //   sortCriteria = { title: -1 };
+      // } else 
+      if (req.query.sort == "priceLow") {
         sortCriteria = { price: 1 };
-      } else if ((req.query.sort = "priceHigh")) {
+      } else if ((req.query.sort == "priceHigh")) {
         sortCriteria = { price: -1 };
       }
     }
@@ -285,6 +286,14 @@ exports.findAll = async (req) => {
     let displayFalseProducts = productsList.filter(
       (product) => !product.vendorDetails.display
     );
+
+    if (req.query && req.query.sort) {
+      if (req.query.sort == "atoz") {
+        displayTrueProducts.sort((a, b) => a.title.localeCompare(b.title));
+      } else if (req.query.sort == "ztoa") {
+        displayTrueProducts.sort((a, b) => b.title.localeCompare(a.title));
+      }
+    }
 
     productsList = [...displayTrueProducts, ...displayFalseProducts];
 
