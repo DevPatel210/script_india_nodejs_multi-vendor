@@ -32,18 +32,18 @@ exports.findAll = async (req) => {
     const pageSize = 10;
     const skip = pageNumber === 1 ? 0 : parseInt((pageNumber - 1) * pageSize);
     let sortCriteria = { _id: -1 };
-    if (req.query && req.query.sort) {
-      // if (req.query.sort == "atoz") {
-      //   sortCriteria = { title: 1 };
-      // } else if (req.query.sort == "ztoa") {
-      //   sortCriteria = { title: -1 };
-      // } else 
-      if (req.query.sort == "priceLow") {
-        sortCriteria = { price: 1 };
-      } else if ((req.query.sort == "priceHigh")) {
-        sortCriteria = { price: -1 };
-      }
-    }
+    // if (req.query && req.query.sort) {
+    //   if (req.query.sort == "atoz") {
+    //     sortCriteria = { title: 1 };
+    //   } else if (req.query.sort == "ztoa") {
+    //     sortCriteria = { title: -1 };
+    //   } else 
+    //   if (req.query.sort == "priceLow") {
+    //     sortCriteria = { price: 1 };
+    //   } else if ((req.query.sort == "priceHigh")) {
+    //     sortCriteria = { price: -1 };
+    //   }
+    // }
     const searchValue = req.query.search;
     let vendors = await makeMongoDbServiceVendor.getDocumentByQuery({
       status: { $ne: "D" },
@@ -292,6 +292,10 @@ exports.findAll = async (req) => {
         displayTrueProducts.sort((a, b) => a.title.localeCompare(b.title));
       } else if (req.query.sort == "ztoa") {
         displayTrueProducts.sort((a, b) => b.title.localeCompare(a.title));
+      } else if (req.query.sort == "priceLow") {
+        displayTrueProducts.sort((a, b) => a.finalPrice - b.finalPrice);
+      } else if ((req.query.sort == "priceHigh")) {
+        displayTrueProducts.sort((a, b) => b.finalPrice - a.finalPrice);
       }
     }
 
