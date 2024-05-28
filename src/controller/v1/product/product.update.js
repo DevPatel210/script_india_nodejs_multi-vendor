@@ -68,14 +68,27 @@ exports.Update = async (req) => {
     if (typeof productData.image == "string") {
       delete productData.image;
     }
-    if (isProduct.oldDetails) {
-      isProduct.oldDetails = null;
-    }
-    const updatedProduct = await makeMongoDbService.findOneAndUpdateDocument(
-      { _id: req.body.product_id },
-      { ...productData, oldDetails: isProduct }
-    );
 
+    // const updatedProduct = await makeMongoDbService.findOneAndUpdateDocument(
+    //   { _id: req.body.product_id },
+    //   { ...productData, oldDetails: isProduct }
+    // );
+    let updatedProduct;
+    if (isProduct.status === "A") {
+      if (isProduct.oldDetails) {
+        isProduct.oldDetails = null;
+      }
+      updatedProduct = await makeMongoDbService.findOneAndUpdateDocument(
+        { _id: req.body.product_id },
+        { ...productData, oldDetails: isProduct }
+      );
+    } else {
+      let oldDetails = { ...isProduct.oldDetails };
+      updatedProduct = await makeMongoDbService.findOneAndUpdateDocument(
+        { _id: req.body.product_id },
+        { ...productData, oldDetails: oldDetails }
+      );
+    }
     if (req.isVendor) {
       const productDetails = await makeMongoDbService.getSingleDocumentById(
         req.body.product_id
