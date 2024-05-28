@@ -116,10 +116,24 @@ exports.verifyOrder = async (req) => {
 };
 
 function getPaymentSuccessfulMessage(order) {
+  const productList = order.accounting.cartAccountingList.map((product) => {
+    return `<li>
+			Title: ${product.productName} <br>
+			Unit Price: $ ${product.unitPrice} <br>
+			Quantity: ${product.quantity} <br>
+			Total Price: $ ${product.totalPrice} <br>
+		</li>`;
+  });
   return `
 		Dear customer,<br>
 		Your payment is completed successfully. Please find the details of your order below: 
-		<h4>Order id:</h4> ${order._id.toString()}
+    <br>
+		<h4>Products List:</h4>
+		<ul>
+			${productList.join("")}
+		</ul>
+    
+    <h4>Order id:</h4> ${order._id.toString()}
 		<h4>Shipping Address:</h4> ${order.shippingAddress}
 		<h4>Billing Address:</h4> ${order.billingAddress}
 		<h4>Final Price:</h4> $ ${order.accounting.finalTotal}
