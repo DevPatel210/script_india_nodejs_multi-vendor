@@ -389,9 +389,14 @@ exports.findById = async (req) => {
     );
 
     let productData = isProduct._doc;
-    if (isProduct._doc.status == "P") {
-      productData = isProduct._doc.oldDetails;
+    if (!(req.isAdmin || req.isVendor) && (productData.status == "P" && productData.oldDetails)) {
+      // Merge original productData with oldDetails
+      productData = { ...productData, ...productData.oldDetails };
     }
+    
+    // if (isProduct._doc.status == "P") {
+    //   productData = isProduct._doc.oldDetails;
+    // }
 
     isProduct = {
       ...productData,
@@ -411,6 +416,7 @@ exports.findById = async (req) => {
     };
     return response(false, null, resMessage.success, isProduct, 200);
   } catch (error) {
+    console.log(error);
     return response(true, null, error.message, error.stack, 500);
   }
 };

@@ -14,7 +14,7 @@ router.get("/all", validate(rules.getAllProducts), isAdmin, isVendor, product.fi
 
 router.get("/vendor/all", verifyToken, isVendorAuth, validate(rules.getAllProducts), product.findAll);
 
-router.get("/", validate(rules.getProduct), product.findById);
+router.get("/", validate(rules.getProduct), isAdmin, isVendor, product.findById);
 
 router.get("/vendor", verifyToken, isVendorAuth, validate(rules.getProduct), product.findById);
 
