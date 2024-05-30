@@ -1,10 +1,10 @@
 const express = require("express");
 const order = require("../controller/v1/checkout");
 const router = express.Router();
-
 const validate = require("../validations/handler");
 const rules = require("../validations/order.validation");
 const { isVendor, verifyToken, isAdmin } = require("../middleware/auth.mdl");
+const { handleAttachmentFile } = require("../services/multerService");
 
 router.get(
   "/",
@@ -62,6 +62,7 @@ router.post(
   verifyToken,
   isVendor,
   isAdmin,
+  handleAttachmentFile,
   validate(rules.addTrackingDetails),
   order.addTrackingDetails
 );

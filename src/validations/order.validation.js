@@ -41,11 +41,12 @@ module.exports = {
 	],
 	
 	addTrackingDetails: [
-		body("order_id", "Enter valid order id").notEmpty().isString().isMongoId(),
+		body("order_id", "Enter valid order id").notEmpty().isString(),
 		body("tracking_number", "Enter valid tracking number").optional().isString(),
 		body("tracking_link", "Enter valid tracking link").optional().isString(),
 		body("remarks", "Please enter remarks").optional().isString(),
 		body("carrier", "Please enter carrier").optional().isString(),
 		body("delivery_date", "Please enter delivery date").optional().isString(),
+		body("email_attachment", "Please enter email attachment").notEmpty().isArray(),
 	]
 };

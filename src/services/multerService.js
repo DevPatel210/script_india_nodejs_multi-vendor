@@ -18,9 +18,33 @@ const storage = multer.diskStorage({
   },
 });
 
+const storageAttachment = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "public/files/"),
+  filename: (req, file, cb) => {  
+    if(!req.body.email_attachment) req.body.email_attachment = []
+    const uniqueName = `${Date.now()}-${Math.round(
+      Math.random() * 1e9
+      )}${path.extname(file.originalname)}`;
+      
+      cb(null, uniqueName);
+      if (file.fieldname == "email_attachment") {
+        req.body.email_attachment.push(uniqueName);
+      }
+      
+      req.body = JSON.parse(JSON.stringify(req.body))
+  },
+});
+
 exports.handleImageFile = multer({
   storage,
   limits: { fileSize: 1024 * 1024 * 5 }, //5 mb limit
 }).fields([
   { name: "image", maxCount: 5 }
+]);
+
+exports.handleAttachmentFile = multer({
+  storage: storageAttachment,
+  limits: { fileSize: 1024 * 1024 * 5 }, //5 mb limit
+}).fields([
+  { name: "email_attachment" }
 ]);

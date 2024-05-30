@@ -1596,6 +1596,7 @@ exports.addTrackingDetails = async (req) => {
         remarks: req.body.remarks,
         carrier: req.body.carrier,
         delivery_date: req.body.delivery_date,
+        email_attachment: req.body.email_attachment
       };
       const updatedOrder = await makeMongoDbService.findOneAndUpdateDocument(
         { _id: req.body.order_id },
