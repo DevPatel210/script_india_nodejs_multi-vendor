@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const path = require("path");
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -25,6 +26,28 @@ async function sendEmail(to, subject, message, onlyToSender=false){
   }
 }
 
+async function sendEmailWithAttachment(to, subject, message, files, onlyToSender=false){
+  const mail_options = {
+    from: process.env.EMAIL_USER,
+    to: onlyToSender ? [to] : [process.env.EMAIL_USER,to],
+    subject: subject,
+    html: message,
+    attachments: files.map((file)=> {
+        return {
+          filename: file,
+          path: path.join('public','files',file)
+        }
+      })
+  }
+  try {
+    const response = await transporter.sendMail(mail_options);
+  } catch (error) {
+    console.log(error);
+    throw new Error(`Error in sending email: ${JSON.stringify(error)}`);
+  }
+}
+
 module.exports = {
-  sendEmail
+  sendEmail,
+  sendEmailWithAttachment
 }

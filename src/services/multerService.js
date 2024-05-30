@@ -22,7 +22,7 @@ const storageAttachment = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "public/files/"),
   filename: (req, file, cb) => {  
     if(!req.body.email_attachment) req.body.email_attachment = []
-    const uniqueName = `${Date.now()}-${Math.round(
+    const uniqueName = `${path.parse(file.originalname).name}-${Date.now()}-${Math.round(
       Math.random() * 1e9
       )}${path.extname(file.originalname)}`;
       

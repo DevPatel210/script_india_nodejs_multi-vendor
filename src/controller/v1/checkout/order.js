@@ -16,7 +16,7 @@ const makeMongoDbServiceVendor = require("../../../services/mongoDbService")({
 });
 const { response, resMessage } = require("../../../helpers/common");
 const { default: mongoose } = require("mongoose");
-const { sendEmail } = require("../../../services/email");
+const { sendEmail, sendEmailWithAttachment } = require("../../../services/email");
 
 const unitShippingCost_firstProduct=6;
 const unitShippingCost_nextProducts=2;
@@ -1605,7 +1605,7 @@ exports.addTrackingDetails = async (req) => {
 
       const user = await makeMongoDbServiceUser.getDocumentById(order.user_id);
       const message = getAddShippingMessage(order);
-      await sendEmail(user.email, "Order is shipped", message, true);
+      await sendEmailWithAttachment(user.email, "Order is shipped", message, req.body.email_attachment, true);
 
       return response(false, resMessage.orderUpdated, null, updatedOrder, 200);
     }
